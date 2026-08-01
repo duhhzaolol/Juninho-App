@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { BottomNav } from '@/components/student/BottomNav'
+import Link from 'next/link'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -30,7 +31,7 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
       <header className="flex items-center gap-3 mb-6">
-        <div className="w-11 h-11 rounded-full bg-purple/40 border border-gold/40" />
+        <Link href="/perfil" className="w-11 h-11 rounded-full bg-purple/40 border border-gold/40 shrink-0" />
         <div>
           <p className="font-display font-bold text-lg text-white">
             {greeting()}, {session?.user?.name?.split(' ')[0] ?? 'Atleta'}
