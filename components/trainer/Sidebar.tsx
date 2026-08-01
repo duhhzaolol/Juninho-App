@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { SignOutButton } from '@/components/shared/SignOutButton'
 
 const items = [
   { href: '/trainer/dashboard', label: 'Dashboard' },
@@ -33,6 +34,9 @@ export function Sidebar() {
           </Link>
         )
       })}
+      <div className="md:mt-auto md:pt-4">
+        <SignOutButton className="px-3 py-2 rounded-control text-sm text-red-400 whitespace-nowrap" />
+      </div>
     </aside>
   )
 }
