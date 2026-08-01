@@ -1,7 +1,6 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 import { BottomNav } from '@/components/student/BottomNav'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -43,22 +42,31 @@ export default async function DashboardPage() {
       </header>
 
       {activeWorkout && (
-        <Card
-          variant="workout"
-          eyebrow="Seu plano atual"
-          title={activeWorkout.workout.name}
-          subtitle={`Semana ${activeWorkout.currentWeek} · Dia ${activeWorkout.currentDay}`}
-          className="mb-4"
-        >
-          <Button size="sm">Iniciar treino</Button>
-        </Card>
+        <Link href={`/treino/${activeWorkout.workoutId}`} className="block mb-4">
+          <Card
+            variant="workout"
+            eyebrow="Seu plano atual"
+            title={activeWorkout.workout.name}
+            subtitle={`Semana ${activeWorkout.currentWeek} · Dia ${activeWorkout.currentDay}`}
+          >
+            <span className="inline-block font-display font-semibold text-xs bg-gold text-navy px-4 py-2 rounded-control">
+              Iniciar treino
+            </span>
+          </Card>
+        </Link>
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        <Card variant="glass" title="Treino do dia" subtitle="Acesse seu treino de hoje" />
-        <Card variant="glass" title="Evolução" subtitle="Acompanhe seu progresso" />
+        <Link href="/treino">
+          <Card variant="glass" title="Treino do dia" subtitle="Acesse seu treino de hoje" />
+        </Link>
+        <Link href="/progresso">
+          <Card variant="glass" title="Evolução" subtitle="Acompanhe seu progresso" />
+        </Link>
         <Card variant="glass" title="Calendário" subtitle="Registre seu uso diário" />
-        <Card variant="glass" title="Biblioteca" subtitle="Aulas, dicas e conteúdos" />
+        <Link href="/biblioteca">
+          <Card variant="glass" title="Biblioteca" subtitle="Aulas, dicas e conteúdos" />
+        </Link>
       </div>
 
       <BottomNav />
