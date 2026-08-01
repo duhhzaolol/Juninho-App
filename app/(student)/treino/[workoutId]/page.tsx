@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { BottomNav } from '@/components/student/BottomNav'
 
 export default async function WorkoutPage({ params }: { params: Promise<{ workoutId: string }> }) {
   const { workoutId } = await params
@@ -26,6 +27,15 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
         {workout.difficulty && <span>· {workout.difficulty}</span>}
       </div>
 
+      {workout.blocks[0] && (
+        <Link
+          href={`/treino/${workout.id}/exercicio/${workout.blocks[0].exerciseId ?? workout.blocks[0].id}`}
+          className="block text-center font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control mb-6"
+        >
+          Iniciar treino
+        </Link>
+      )}
+
       <div className="flex flex-col gap-3">
         {workout.blocks.map((block, i) => (
           <Link
@@ -45,6 +55,8 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
           </Link>
         ))}
       </div>
+
+      <BottomNav />
     </main>
   )
 }
