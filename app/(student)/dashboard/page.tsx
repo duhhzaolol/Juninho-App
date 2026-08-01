@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { BottomNav } from '@/components/student/BottomNav'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -14,9 +15,10 @@ function greeting() {
 
 export default async function DashboardPage() {
   const session = await auth()
+  if (!session?.user?.id) redirect('/login')
 
   const student = await prisma.studentProfile.findUnique({
-    where: { userId: session?.user?.id },
+    where: { userId: session.user.id },
     include: {
       assignments: {
         where: { status: 'active' },
