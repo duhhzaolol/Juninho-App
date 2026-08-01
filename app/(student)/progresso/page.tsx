@@ -4,11 +4,14 @@ import { Card } from '@/components/ui/Card'
 import { EvolutionChart } from '@/components/student/EvolutionChart'
 import { PhotoComparison } from '@/components/student/PhotoComparison'
 import { BottomNav } from '@/components/student/BottomNav'
+import { redirect } from 'next/navigation'
 
 export default async function ProgressPage() {
   const session = await auth()
+  if (!session?.user?.id) redirect('/login')
+
   const student = await prisma.studentProfile.findUnique({
-    where: { userId: session?.user?.id },
+    where: { userId: session.user.id },
     include: {
       exerciseLogs: { orderBy: { date: 'asc' } },
       progressPhotos: true,
