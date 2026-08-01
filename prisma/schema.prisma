@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TRAINER
+}
+
+enum BlockType {
+  EXERCISE
+  SUPERSET
+  DROPSET
+  REST_PAUSE
+  BISET
+  CIRCUIT
+  REST
+}
+
+enum DayStatus {
+  TRAINED
+  MISSED
+  CARDIO
+  REST
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  role          Role
+  createdAt     DateTime @default(now())
+
+  studentProfile StudentProfile?
+  trainerProfile TrainerProfile?
+}
+
+model TrainerProfile {
+  id       String @id @default(cuid())
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id])
+  bio      String?
+  brandName String?
+
+  students        StudentProfile[]
+  workouts        Workout[]
+  exercises       Exercise[]
+  libraryContents LibraryContent[]
+  plans           Plan[]
+}
+
+model StudentProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  trainerId    String
+  trainer      TrainerProfile @relation(fields: [trainerId], references: [id])
+
+  goal         String?
+  weightKg     Float?
+  heightCm     Float?
+  age          Int?
+  level        String?
+  avatarUrl    String?
+
+  assignments      WorkoutAssignment[]
+  exerciseLogs     ExerciseLog[]
+  progressEntries  ProgressEntry[]
+  progressPhotos   ProgressPhoto[]
+  calendarEntries  CalendarEntry[]
+  subscriptions    Subscription[]
+}
+
+model Exercise {
+  id             String   @id @default(cuid())
+  trainerId      String
+  trainer        TrainerProfile @relation(fields: [trainerId], references: [id])
+
+  name           String
+  videoUrl       String?
+  gifUrl         String?
+  description    String?
+  correctForm    String?
+  commonMistakes String?
+  muscleGroup    String
+  equipment      String?
+
+  workoutExercises WorkoutExercise[]
+  exerciseLogs     ExerciseLog[]
+}
+
+model Workout {
+  id           String   @id @default(cuid())
+  trainerId    String
+  trainer      TrainerProfile @relation(fields: [trainerId], references: [id])
+
+  name         String
+  imageUrl     String?
+  goal         String?
+  estimatedMin Int?
+  difficulty   String?
+  isTemplate   Boolean  @default(false)
+
+  blocks       WorkoutExercise[]
+  assignments  WorkoutAssignment[]
+}
+
+model WorkoutExercise {
+  id          String    @id @default(cuid())
+  workoutId   String
+  workout     Workout   @relation(fields: [workoutId], references: [id])
+  exerciseId  String?
+  exercise    Exercise? @relation(fields: [exerciseId], references: [id])
+
+  order       Int
+  type        BlockType @default(EXERCISE)
+  sets        Int?
+  reps        String?
+  loadKg      Float?
+  rpe         Int?
+  restSeconds Int?
+  notes       String?
+}
+
+model WorkoutAssignment {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  workoutId   String
+  workout     Workout  @relation(fields: [workoutId], references: [id])
+
+  startedAt   DateTime @default(now())
+  currentWeek Int      @default(1)
+  currentDay  Int      @default(1)
+  status      String   @default("active")
+}
+
+model ExerciseLog {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+
+  date        DateTime @default(now())
+  loadKg      Float
+  reps        Int
+  notes       String?
+}
+
+model ProgressEntry {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+
+  date        DateTime @default(now())
+  weightKg    Float?
+  bodyFatPct  Float?
+  measurements Json?
+}
+
+model ProgressPhoto {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+
+  date        DateTime @default(now())
+  tag         String
+  url         String
+}
+
+model CalendarEntry {
+  id          String    @id @default(cuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+
+  date        DateTime
+  status      DayStatus
+}
+
+model LibraryContent {
+  id          String   @id @default(cuid())
+  trainerId   String
+  trainer     TrainerProfile @relation(fields: [trainerId], references: [id])
+
+  type        String
+  category    String?
+  title       String
+  url         String
+  requiredPlanId String?
+}
+
+model Plan {
+  id           String   @id @default(cuid())
+  trainerId    String
+  trainer      TrainerProfile @relation(fields: [trainerId], references: [id])
+
+  type         String
+  name         String
+  priceCents   Int
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id])
+  planId      String
+  plan        Plan     @relation(fields: [planId], references: [id])
+
+  status      String   @default("active")
+  startedAt   DateTime @default(now())
+  renewsAt    DateTime?
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  content     String
+  createdAt   DateTime @default(now())
+  readAt      DateTime?
+}

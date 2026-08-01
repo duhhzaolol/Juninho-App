@@ -1,0 +1,68 @@
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { Card } from '@/components/ui/Card'
+import { EvolutionChart } from '@/components/student/EvolutionChart'
+import { PhotoComparison } from '@/components/student/PhotoComparison'
+import { BottomNav } from '@/components/student/BottomNav'
+
+export default async function ProgressPage() {
+  const session = await auth()
+  const student = await prisma.studentProfile.findUnique({
+    where: { userId: session?.user?.id },
+    include: {
+      exerciseLogs: { orderBy: { date: 'asc' } },
+      progressPhotos: true,
+      calendarEntries: true,
+    },
+  })
+
+  if (!student) return null
+
+  // Carga total levantada (soma de carga x reps de todos os logs)
+  const totalLoad = student.exerciseLogs.reduce((sum, log) => sum + log.loadKg * log.reps, 0)
+
+  // Série para o gráfico: carga total por dia
+  const byDate = new Map<string, number>()
+  for (const log of student.exerciseLogs) {
+    const key = log.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+    byDate.set(key, (byDate.get(key) ?? 0) + log.loadKg * log.reps)
+  }
+  const chartData = Array.from(byDate.entries()).map(([date, value]) => ({ date, value }))
+
+  // Sequência atual de dias treinados
+  const trainedDates = student.calendarEntries
+    .filter((e) => e.status === 'TRAINED')
+    .map((e) => e.date)
+    .sort((a, b) => b.getTime() - a.getTime())
+
+  let streak = 0
+  let cursor = new Date()
+  for (const date of trainedDates) {
+    const diffDays = Math.floor((cursor.getTime() - date.getTime()) / 86400000)
+    if (diffDays <= 1) {
+      streak++
+      cursor = date
+    } else break
+  }
+
+  return (
+    <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
+      <p className="font-display font-bold text-xl text-white mb-6">Progresso</p>
+
+      <Card variant="metric" eyebrow="Evolução geral" title={`+${chartData.length > 1 ? Math.round(((chartData.at(-1)!.value - chartData[0].value) / chartData[0].value) * 100) : 0}%`} className="mb-4">
+        <EvolutionChart data={chartData} />
+      </Card>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <Card variant="glass" eyebrow="Carga total levantada" title={`${totalLoad.toLocaleString('pt-BR')} kg`} />
+        <Card variant="glass" eyebrow="Sequência atual" title={`${streak} dias`} />
+      </div>
+
+      <Card variant="glass" eyebrow="Fotos" title="Comparação de progresso" className="mb-4">
+        <PhotoComparison photos={student.progressPhotos} />
+      </Card>
+
+      <BottomNav />
+    </main>
+  )
+}
