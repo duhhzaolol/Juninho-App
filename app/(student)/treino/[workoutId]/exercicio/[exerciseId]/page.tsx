@@ -1,67 +1,51 @@
-'use client'
+import { prisma } from '@/lib/prisma'
+import { ExerciseSession } from '@/components/student/ExerciseSession'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { SetRow } from '@/components/student/SetRow'
-import { RestTimer } from '@/components/student/RestTimer'
+export default async function ExercisePage({
+  params,
+}: {
+  params: Promise<{ workoutId: string; exerciseId: string }>
+}) {
+  const { workoutId, exerciseId } = await params
 
-// Em produção estes dados vêm de uma query ao Prisma (exercise + workoutExercise
-// pelo exerciseId/workoutId dos params), simplificado aqui para o fluxo de UI.
-const exercise = {
-  name: 'Agachamento',
-  videoUrl: null,
-  muscleGroup: 'Glúteos, quadríceps',
-  correctForm: 'Desça controlando o quadril para trás, joelhos alinhados com a ponta dos pés.',
-  commonMistakes: 'Joelhos caindo para dentro, perder a curvatura lombar.',
-  restSeconds: 60,
-  sets: [
-    { setNumber: 1, targetReps: 12, load: 40, rpe: 7 },
-    { setNumber: 2, targetReps: 12, load: 40, rpe: 8 },
-    { setNumber: 3, targetReps: 10, load: 42, rpe: 8 },
-    { setNumber: 4, targetReps: 10, load: 42, rpe: 9 },
-  ],
-}
+  const workout = await prisma.workout.findUnique({
+    where: { id: workoutId },
+    include: {
+      blocks: {
+        orderBy: { order: 'asc' },
+        include: { exercise: true },
+      },
+    },
+  })
+  if (!workout) return null
 
-export default function ExercisePage() {
-  const [completed, setCompleted] = useState<number[]>([])
-  const [resting, setResting] = useState(false)
+  const sequence = workout.blocks.filter((b) => b.exerciseId)
+  const index = sequence.findIndex((b) => b.exerciseId === exerciseId)
+  const block = sequence[index]
+  if (!block || !block.exercise) return null
 
-  function handleComplete(setNumber: number) {
-    setCompleted((prev) => [...prev, setNumber])
-    setResting(true)
-    // Em produção: POST para /api/progress criando um ExerciseLog
-  }
+  const nextExerciseId = sequence[index + 1]?.exerciseId ?? null
+  const isLast = index === sequence.length - 1
 
   return (
-    <main className="min-h-screen bg-navy pb-32 px-5 pt-8">
-      <Link href="../.." className="text-white/50 text-sm mb-4 inline-block">← {exercise.name}</Link>
-
-      <div className="bg-navy-light rounded-card h-44 mb-4 flex items-center justify-center text-white/30 text-sm">
-        Vídeo / GIF do exercício
-      </div>
-
-      <p className="text-xs text-white/40 mb-6">{exercise.muscleGroup}</p>
-
-      <div className="flex flex-col gap-2 mb-6">
-        {exercise.sets.map((set) => (
-          <SetRow
-            key={set.setNumber}
-            {...set}
-            completed={completed.includes(set.setNumber)}
-            onComplete={() => handleComplete(set.setNumber)}
-          />
-        ))}
-      </div>
-
-      <details className="text-xs text-white/50">
-        <summary className="cursor-pointer text-white/70 mb-1">Execução correta e erros comuns</summary>
-        <p className="mb-1">{exercise.correctForm}</p>
-        <p>{exercise.commonMistakes}</p>
-      </details>
-
-      {resting && (
-        <RestTimer seconds={exercise.restSeconds} onFinish={() => setResting(false)} />
-      )}
-    </main>
+    <ExerciseSession
+      workoutId={workoutId}
+      exercise={{
+        id: block.exercise.id,
+        name: block.exercise.name,
+        muscleGroup: block.exercise.muscleGroup,
+        videoUrl: block.exercise.videoUrl,
+        gifUrl: block.exercise.gifUrl,
+        correctForm: block.exercise.correctForm,
+        commonMistakes: block.exercise.commonMistakes,
+      }}
+      totalSets={block.sets ?? 3}
+      targetReps={block.reps ?? '10-12'}
+      defaultLoad={block.loadKg ?? 0}
+      restSeconds={block.restSeconds ?? 60}
+      nextExerciseId={nextExerciseId}
+      isLast={isLast}
+      progress={{ current: index + 1, total: sequence.length }}
+    />
   )
 }
