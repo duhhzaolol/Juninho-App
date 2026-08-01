@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Badge } from '@/components/ui/Badge'
 import { BottomNav } from '@/components/student/BottomNav'
+import { SignOutButton } from '@/components/shared/SignOutButton'
 import { redirect } from 'next/navigation'
 
 export default async function ProfilePage() {
@@ -59,6 +60,7 @@ export default async function ProfilePage() {
       <div className="flex flex-col gap-2">
         <button className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Editar informações</button>
         <button className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Trocar senha</button>
+        <SignOutButton />
       </div>
 
       <BottomNav />
