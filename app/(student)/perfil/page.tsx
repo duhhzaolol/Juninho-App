@@ -2,11 +2,14 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Badge } from '@/components/ui/Badge'
 import { BottomNav } from '@/components/student/BottomNav'
+import { redirect } from 'next/navigation'
 
 export default async function ProfilePage() {
   const session = await auth()
+  if (!session?.user?.id) redirect('/login')
+
   const student = await prisma.studentProfile.findUnique({
-    where: { userId: session?.user?.id },
+    where: { userId: session.user.id },
     include: {
       user: true,
       subscriptions: { where: { status: 'active' }, include: { plan: true } },
