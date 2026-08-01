@@ -1,123 +1,53 @@
-'use client'
-
-import { useState } from 'react'
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
+import Link from 'next/link'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/trainer/Sidebar'
-import { Button } from '@/components/ui/Button'
-import { WorkoutBlockCard, WorkoutBlockData } from '@/components/trainer/workout-builder/WorkoutBlockCard'
-import { BlockTypeMenu, BlockType } from '@/components/trainer/workout-builder/BlockTypeMenu'
+import { Badge } from '@/components/ui/Badge'
 
-let nextId = 1
+export default async function TrainerWorkoutsPage() {
+  const session = await auth()
+  if (!session?.user?.id) redirect('/login')
 
-export default function WorkoutBuilderPage() {
-  const [name, setName] = useState('')
-  const [blocks, setBlocks] = useState<WorkoutBlockData[]>([])
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const trainer = await prisma.trainerProfile.findUnique({ where: { userId: session.user.id } })
+  if (!trainer) return null
 
-  const sensors = useSensors(useSensor(PointerSensor))
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-
-    setBlocks((prev) => {
-      const oldIndex = prev.findIndex((b) => b.id === active.id)
-      const newIndex = prev.findIndex((b) => b.id === over.id)
-      return arrayMove(prev, oldIndex, newIndex)
-    })
-  }
-
-  function addBlock(type: BlockType) {
-    setBlocks((prev) => [
-      ...prev,
-      {
-        id: `block-${nextId++}`,
-        type,
-        exerciseNames: [],
-        sets: 3,
-        reps: '10-12',
-        restSeconds: 60,
-      },
-    ])
-    setMenuOpen(false)
-  }
-
-  function duplicateBlock(id: string) {
-    setBlocks((prev) => {
-      const block = prev.find((b) => b.id === id)
-      if (!block) return prev
-      return [...prev, { ...block, id: `block-${nextId++}` }]
-    })
-  }
-
-  function deleteBlock(id: string) {
-    setBlocks((prev) => prev.filter((b) => b.id !== id))
-  }
-
-  async function saveWorkout(asTemplate: boolean) {
-    setSaving(true)
-    await fetch('/api/workouts', {
-      method: 'POST',
-      body: JSON.stringify({ name, isTemplate: asTemplate, blocks }),
-    })
-    setSaving(false)
-  }
+  const workouts = await prisma.workout.findMany({
+    where: { trainerId: trainer.id },
+    include: {
+      _count: { select: { assignments: true, blocks: true } },
+    },
+    orderBy: { name: 'asc' },
+  })
 
   return (
     <div className="min-h-screen bg-navy flex flex-col md:flex-row">
       <Sidebar />
 
-      <main className="flex-1 px-6 py-8 pb-28">
+      <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nome do treino"
-            className="bg-transparent font-display font-bold text-xl text-white placeholder:text-white/30 outline-none"
-          />
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={() => saveWorkout(true)} disabled={saving}>
-              Salvar como modelo
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => saveWorkout(false)} disabled={saving}>
-              Salvar treino
-            </Button>
-          </div>
+          <p className="font-display font-bold text-xl text-white">Treinos</p>
+          <Link href="/trainer/treinos/criador" className="text-gold-light text-sm">+ Novo treino</Link>
         </div>
 
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-            <div className="flex flex-col gap-2 mb-4">
-              {blocks.map((block, i) => (
-                <WorkoutBlockCard
-                  key={block.id}
-                  block={block}
-                  index={i}
-                  onEdit={() => {}}
-                  onDuplicate={() => duplicateBlock(block.id)}
-                  onDelete={() => deleteBlock(block.id)}
-                />
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {workouts.map((workout) => (
+            <div key={workout.id} className="bg-navy-light border border-white/10 rounded-control p-4">
+              <div className="flex items-center justify-between mb-2">
+                {workout.isTemplate && <Badge color="purple" label="Modelo" />}
+                <span className="text-xs text-white/40 ml-auto">{workout._count.blocks} exercícios</span>
+              </div>
+              <p className="text-sm text-white mb-1">{workout.name}</p>
+              <p className="text-xs text-white/40">
+                {workout.goal ?? 'Sem objetivo definido'} · {workout._count.assignments} aluno(s) usando
+              </p>
             </div>
-          </SortableContext>
-        </DndContext>
-
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setMenuOpen(true)}>
-            + Bloco
-          </Button>
+          ))}
         </div>
 
-        {menuOpen && <BlockTypeMenu onSelect={addBlock} onClose={() => setMenuOpen(false)} />}
+        {workouts.length === 0 && (
+          <p className="text-white/40 text-sm">Nenhum treino criado ainda. Clique em "+ Novo treino" pra começar.</p>
+        )}
       </main>
     </div>
   )
