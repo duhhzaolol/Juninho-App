@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 
 export default function LoginPage() {
@@ -18,7 +19,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-navy flex flex-col justify-center px-8">
-      <p className="font-display font-extrabold text-3xl text-white mb-1">JM Team</p>
+      <Image src="/logo-jm.png" alt="JM Team" width={120} height={100} className="mb-3" priority />
       <p className="text-white/50 text-sm mb-10">Entre para continuar sua evolução.</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
