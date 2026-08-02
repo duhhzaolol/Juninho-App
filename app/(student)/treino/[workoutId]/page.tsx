@@ -29,7 +29,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
 
       {workout.blocks[0] && (
         <Link
-          href={`/treino/${workout.id}/exercicio/${workout.blocks[0].exerciseId ?? workout.blocks[0].id}`}
+          href={`/treino/${workout.id}/sessao`}
           className="block text-center font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control mb-6"
         >
           Iniciar treino
