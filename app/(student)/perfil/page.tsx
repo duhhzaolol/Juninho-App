@@ -17,7 +17,7 @@ export default async function ProfilePage() {
       subscriptions: { where: { status: 'active' }, include: { plan: true } },
     },
   })
-  if (!student) return null
+  if (!student) redirect('/login')
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
