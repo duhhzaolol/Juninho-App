@@ -127,8 +127,8 @@ export default async function DashboardPage() {
       <ActivityRow
         icon={<Calendar size={20} className="text-white" />}
         iconBg="bg-purple"
-        title="Ficha 30 Dias"
-        subtitle="Registre seu uso diário"
+        title="Constância"
+        subtitle="Frequência e sequência de treinos"
         href="/calendario"
       />
       <ActivityRow

@@ -90,7 +90,7 @@ export default async function CalendarPage({
         <Link href="/dashboard" className="text-white/50">
           <ChevronLeft size={20} />
         </Link>
-        <p className="font-display font-bold text-lg text-white">Ficha 30 Dias</p>
+        <p className="font-display font-bold text-lg text-white">Constância</p>
       </div>
 
       <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-4">

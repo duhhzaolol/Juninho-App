@@ -47,6 +47,7 @@ model TrainerProfile {
   user     User   @relation(fields: [userId], references: [id])
   bio      String?
   brandName String?
+  avatarUrl String?
 
   students        StudentProfile[]
   workouts        Workout[]
