@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { WhatsAppButton } from '@/components/student/WhatsAppButton'
+import { APP_VERSION } from '@/lib/version'
 
 export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null }) {
   const [email, setEmail] = useState('')
@@ -73,6 +74,12 @@ export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null 
           <WhatsAppButton number={trainerWhatsapp} />
         </>
       )}
+
+      <div className="mt-10 flex flex-col items-center gap-2">
+        <p className="text-[10px] text-white/25">Criado por</p>
+        <Image src="/instaby-logo.png" alt="Instaby" width={130} height={43} />
+        <p className="text-[9px] text-white/20">{APP_VERSION}</p>
+      </div>
     </main>
   )
 }
