@@ -76,7 +76,7 @@ export default async function DashboardPage() {
         iconBg="bg-purple"
         title="Ficha 30 Dias"
         subtitle="Registre seu uso diário"
-        comingSoon
+        href="/calendario"
       />
       <ActivityRow
         icon={<PlayCircle size={20} className="text-white" />}
