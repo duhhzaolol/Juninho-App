@@ -1,9 +1,12 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Card } from '@/components/ui/Card'
+import { Avatar } from '@/components/ui/Avatar'
+import { WorkoutHeroCard } from '@/components/student/WorkoutHeroCard'
+import { ActivityRow } from '@/components/student/ActivityRow'
 import { BottomNav } from '@/components/student/BottomNav'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Dumbbell, BarChart3, Calendar, PlayCircle } from 'lucide-react'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -32,7 +35,9 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
       <header className="flex items-center gap-3 mb-6">
-        <Link href="/perfil" className="w-11 h-11 rounded-full bg-purple/40 border border-gold/40 shrink-0" />
+        <Link href="/perfil">
+          <Avatar src={student?.avatarUrl} size="md" ring />
+        </Link>
         <div>
           <p className="font-display font-bold text-lg text-white">
             {greeting()}, {session?.user?.name?.split(' ')[0] ?? 'Atleta'}
@@ -42,32 +47,44 @@ export default async function DashboardPage() {
       </header>
 
       {activeWorkout && (
-        <Link href={`/treino/${activeWorkout.workoutId}`} className="block mb-4">
-          <Card
-            variant="workout"
-            eyebrow="Seu plano atual"
-            title={activeWorkout.workout.name}
-            subtitle={`Semana ${activeWorkout.currentWeek} · Dia ${activeWorkout.currentDay}`}
-          >
-            <span className="inline-block font-display font-semibold text-xs bg-gold text-navy px-4 py-2 rounded-control">
-              Iniciar treino
-            </span>
-          </Card>
-        </Link>
+        <WorkoutHeroCard
+          workoutId={activeWorkout.workoutId}
+          name={activeWorkout.workout.name}
+          goal={activeWorkout.workout.goal}
+          subtitle={`Semana ${activeWorkout.currentWeek} · Dia ${activeWorkout.currentDay}`}
+        />
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <Link href="/treino">
-          <Card variant="glass" title="Treino do dia" subtitle="Acesse seu treino de hoje" />
-        </Link>
-        <Link href="/progresso">
-          <Card variant="glass" title="Evolução" subtitle="Acompanhe seu progresso" />
-        </Link>
-        <Card variant="glass" title="Calendário" subtitle="Registre seu uso diário" />
-        <Link href="/biblioteca">
-          <Card variant="glass" title="Biblioteca" subtitle="Aulas, dicas e conteúdos" />
-        </Link>
-      </div>
+      <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Atividades</p>
+
+      <ActivityRow
+        icon={<Dumbbell size={20} className="text-navy" />}
+        iconBg="bg-gold"
+        title="Treino do Dia"
+        subtitle="Acesse seu treino de hoje"
+        href="/treino"
+      />
+      <ActivityRow
+        icon={<BarChart3 size={20} className="text-white" />}
+        iconBg="bg-purple"
+        title="Progressão"
+        subtitle="Acompanhe sua evolução"
+        href="/progresso"
+      />
+      <ActivityRow
+        icon={<Calendar size={20} className="text-white" />}
+        iconBg="bg-purple"
+        title="Ficha 30 Dias"
+        subtitle="Registre seu uso diário"
+        comingSoon
+      />
+      <ActivityRow
+        icon={<PlayCircle size={20} className="text-white" />}
+        iconBg="bg-purple"
+        title="Materiais"
+        subtitle="Aulas, dicas e conteúdos"
+        href="/biblioteca"
+      />
 
       <BottomNav />
     </main>
