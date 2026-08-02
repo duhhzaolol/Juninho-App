@@ -6,6 +6,7 @@ import { ActivityRow } from '@/components/student/ActivityRow'
 import { StatusCard } from '@/components/shared/StatusCard'
 import { BottomNav } from '@/components/student/BottomNav'
 import { FadeIn } from '@/components/shared/FadeIn'
+import { WhatsAppButton } from '@/components/student/WhatsAppButton'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle, Coffee, CheckCircle2 } from 'lucide-react'
@@ -38,6 +39,7 @@ export default async function DashboardPage() {
       },
       subscriptions: { where: { status: 'active' }, take: 1 },
       calendarEntries: { where: { date: { gte: startOfToday } }, take: 1 },
+      trainer: true,
     },
   })
   if (!student) redirect('/login')
@@ -129,6 +131,10 @@ export default async function DashboardPage() {
           <ActivityRow icon={a.icon} iconBg={a.iconBg} title={a.title} subtitle={a.subtitle} href={a.href} />
         </FadeIn>
       ))}
+
+      <FadeIn delay={0.35}>
+        <WhatsAppButton number={student.trainer.whatsapp} />
+      </FadeIn>
 
       <BottomNav />
     </main>
