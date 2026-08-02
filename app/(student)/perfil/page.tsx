@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/student/BottomNav'
 import { SignOutButton } from '@/components/shared/SignOutButton'
 import { AvatarUpload } from '@/components/student/AvatarUpload'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -59,8 +60,8 @@ export default async function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <button className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Editar informações</button>
-        <button className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Trocar senha</button>
+        <Link href="/perfil/editar" className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Editar informações</Link>
+        <Link href="/perfil/senha" className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Trocar senha</Link>
         <SignOutButton />
       </div>
 
