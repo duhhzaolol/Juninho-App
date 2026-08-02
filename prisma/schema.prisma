@@ -113,6 +113,7 @@ model Workout {
   blocks       WorkoutExercise[]
   assignments  WorkoutAssignment[]
   programDays  WeeklyProgramDay[]
+  calendarEntries CalendarEntry[]
 }
 
 model WorkoutExercise {
@@ -207,6 +208,8 @@ model CalendarEntry {
 
   date        DateTime
   status      DayStatus
+  workoutId   String?
+  workout     Workout?  @relation(fields: [workoutId], references: [id])
 }
 
 model LibraryContent {

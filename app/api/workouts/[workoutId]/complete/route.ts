@@ -6,7 +6,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ workout
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-  await params // mantido por compatibilidade de assinatura de rota
+  const { workoutId } = await params
 
   const student = await prisma.studentProfile.findUnique({ where: { userId: session.user.id } })
   if (!student) return NextResponse.json({ error: 'not a student' }, { status: 403 })
@@ -20,7 +20,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ workout
 
   if (!alreadyLoggedToday) {
     await prisma.calendarEntry.create({
-      data: { studentId: student.id, date: new Date(), status: 'TRAINED' },
+      data: { studentId: student.id, date: new Date(), status: 'TRAINED', workoutId },
+    })
+  } else {
+    // Se já tinha um registro de hoje sem treino vinculado, completa com o treino feito agora
+    await prisma.calendarEntry.update({
+      where: { id: alreadyLoggedToday.id },
+      data: { status: 'TRAINED', workoutId },
     })
   }
 
