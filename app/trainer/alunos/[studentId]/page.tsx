@@ -17,6 +17,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       progressPhotos: true,
       assignments: { include: { workout: true }, where: { status: 'active' } },
       subscriptions: { where: { status: 'active' }, include: { plan: true }, take: 1 },
+      workoutRatings: { orderBy: { createdAt: 'desc' }, take: 5, include: { workout: true } },
     },
   })
 
@@ -110,6 +111,23 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <Card variant="glass" eyebrow="Fotos" title="Progresso visual" className="mb-4">
           <PhotoComparison photos={student.progressPhotos} />
         </Card>
+
+        {student.workoutRatings.length > 0 && (
+          <div className="bg-navy-light border border-white/10 rounded-control p-4 mb-4">
+            <p className="text-[11px] uppercase tracking-wider text-white/40 mb-3">Avaliações recentes</p>
+            <div className="flex flex-col gap-3">
+              {student.workoutRatings.map((r) => (
+                <div key={r.id} className="border-b border-white/5 pb-3 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-white/60">{r.workout.name}</span>
+                    <span className="text-gold-light text-xs">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                  </div>
+                  {r.comment && <p className="text-xs text-white/40">{r.comment}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Link href={`/trainer/mensagens?to=${student.userId}`} className="text-gold-light text-sm block mb-4">
           Enviar mensagem →

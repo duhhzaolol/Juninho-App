@@ -78,6 +78,7 @@ model StudentProfile {
   progressPhotos   ProgressPhoto[]
   calendarEntries  CalendarEntry[]
   subscriptions    Subscription[]
+  workoutRatings   WorkoutRating[]
 }
 
 model Exercise {
@@ -114,6 +115,7 @@ model Workout {
   assignments  WorkoutAssignment[]
   programDays  WeeklyProgramDay[]
   calendarEntries CalendarEntry[]
+  ratings      WorkoutRating[]
 }
 
 model WorkoutExercise {
@@ -247,6 +249,18 @@ model Subscription {
   status      String   @default("active")
   startedAt   DateTime @default(now())
   renewsAt    DateTime?
+}
+
+model WorkoutRating {
+  id        String   @id @default(cuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id])
+  workoutId String
+  workout   Workout  @relation(fields: [workoutId], references: [id])
+
+  rating    Int      // 1 a 5
+  comment   String?
+  createdAt DateTime @default(now())
 }
 
 model Message {

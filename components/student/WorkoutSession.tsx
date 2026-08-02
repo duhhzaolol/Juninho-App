@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Stepper } from '@/components/shared/Stepper'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Star } from 'lucide-react'
 
 interface ExerciseData {
   id: string
@@ -51,6 +51,10 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const [completed, setCompleted] = useState(false)
   const [completedAt, setCompletedAt] = useState<Date | null>(null)
   const [finalElapsed, setFinalElapsed] = useState(0)
+  const [rating, setRating] = useState(0)
+  const [ratingComment, setRatingComment] = useState('')
+  const [ratingSent, setRatingSent] = useState(false)
+  const [sendingRating, setSendingRating] = useState(false)
   const lastActivity = useRef(Date.now())
 
   // Cronômetro do treino inteiro
@@ -114,6 +118,17 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     }).catch(() => {})
   }
 
+  async function sendRating() {
+    if (rating === 0) return
+    setSendingRating(true)
+    await fetch(`/api/workouts/${workoutId}/rating`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, comment: ratingComment }),
+    }).catch(() => {})
+    setSendingRating(false)
+    setRatingSent(true)
+  }
+
   async function finishWorkout() {
     setFinishing(true)
     setFinalElapsed(elapsed)
@@ -141,10 +156,47 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
           {completedAt.toLocaleDateString('pt-BR')} às{' '}
           {completedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </p>
-        <div className="bg-navy-light border border-white/10 rounded-card px-8 py-4 mb-8">
+        <div className="bg-navy-light border border-white/10 rounded-card px-8 py-4 mb-6">
           <p className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Tempo total</p>
           <p className="font-display font-bold text-2xl text-gold-light">{femm}:{fess}</p>
         </div>
+
+        {!ratingSent ? (
+          <div className="w-full bg-navy-light border border-white/10 rounded-card p-4 mb-6">
+            <p className="text-sm text-white font-medium mb-3">Como foi seu treino hoje?</p>
+            <div className="flex justify-center gap-1 mb-3">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button key={n} type="button" onClick={() => setRating(n)}>
+                  <Star
+                    size={28}
+                    className={n <= rating ? 'text-gold fill-gold' : 'text-white/20'}
+                  />
+                </button>
+              ))}
+            </div>
+            {rating > 0 && (
+              <>
+                <textarea
+                  placeholder="Deixe um comentário (opcional)"
+                  rows={2}
+                  value={ratingComment}
+                  onChange={(e) => setRatingComment(e.target.value)}
+                  className="w-full bg-navy border border-white/10 rounded-control px-3 py-2 text-white text-sm placeholder:text-white/30 mb-3"
+                />
+                <button
+                  onClick={sendRating}
+                  disabled={sendingRating}
+                  className="w-full font-display font-semibold text-sm bg-gold text-navy py-2.5 rounded-control"
+                >
+                  {sendingRating ? 'Enviando...' : 'Enviar avaliação'}
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-gold-light mb-6">Valeu pelo feedback! 🙌</p>
+        )}
+
         <Link
           href="/dashboard"
           className="w-full font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control text-center"
