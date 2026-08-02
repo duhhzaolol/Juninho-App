@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { EvolutionChart } from '@/components/student/EvolutionChart'
 import { PhotoComparison } from '@/components/student/PhotoComparison'
+import { ResetPasswordButton } from '@/components/trainer/ResetPasswordButton'
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ studentId: string }> }) {
   const { studentId } = await params
@@ -110,9 +111,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           <PhotoComparison photos={student.progressPhotos} />
         </Card>
 
-        <Link href={`/trainer/mensagens?to=${student.userId}`} className="text-gold-light text-sm">
+        <Link href={`/trainer/mensagens?to=${student.userId}`} className="text-gold-light text-sm block mb-4">
           Enviar mensagem →
         </Link>
+
+        <ResetPasswordButton studentId={student.id} />
       </main>
     </div>
   )

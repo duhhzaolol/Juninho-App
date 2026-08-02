@@ -36,8 +36,10 @@ export async function POST(req: Request) {
         create: blocks.map((b: any, i: number) => ({
           order: i,
           type: b.type,
+          exerciseId: b.exerciseId || null,
           sets: b.sets,
           reps: b.reps,
+          loadKg: b.loadKg,
           restSeconds: b.restSeconds,
           notes: b.notes,
         })),

@@ -12,8 +12,8 @@ const config: Config = {
           dark: '#2E0A5C',
         },
         navy: {
-          DEFAULT: '#0B0E1A',
-          light: '#12162A',
+          DEFAULT: '#0f0923',
+          light: '#151430',
         },
         gold: {
           DEFAULT: '#F5B300',

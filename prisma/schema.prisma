@@ -48,6 +48,7 @@ model TrainerProfile {
   bio      String?
   brandName String?
   avatarUrl String?
+  whatsapp  String?
 
   students        StudentProfile[]
   workouts        Workout[]

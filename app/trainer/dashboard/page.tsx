@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import Link from 'next/link'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Avatar } from '@/components/ui/Avatar'
 import { ActivityRow } from '@/components/student/ActivityRow'
@@ -44,6 +45,7 @@ export default async function TrainerDashboardPage() {
             </p>
             <Badge color="gold" label="Professor" />
           </div>
+          <Link href="/trainer/perfil" className="text-white/40 text-xs">Editar</Link>
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-6">

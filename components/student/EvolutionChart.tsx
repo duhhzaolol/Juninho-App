@@ -13,7 +13,7 @@ export function EvolutionChart({ data }: EvolutionChartProps) {
         <LineChart data={data}>
           <XAxis dataKey="date" stroke="#9B9FB5" fontSize={10} tickLine={false} axisLine={false} />
           <Tooltip
-            contentStyle={{ background: '#12162A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
+            contentStyle={{ background: '#151430', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
             labelStyle={{ color: '#9B9FB5' }}
           />
           <Line type="monotone" dataKey="value" stroke="#F5B300" strokeWidth={2.5} dot={false} />
