@@ -135,6 +135,7 @@ model WorkoutAssignment {
   workoutId   String
   workout     Workout  @relation(fields: [workoutId], references: [id])
 
+  weekday     Int?     // 0=domingo ... 6=sábado (mesma convenção do Date.getDay() do JS); null = sem dia fixo (modelo antigo)
   startedAt   DateTime @default(now())
   currentWeek Int      @default(1)
   currentDay  Int      @default(1)

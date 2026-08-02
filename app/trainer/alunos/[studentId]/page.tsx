@@ -85,15 +85,22 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           )}
         </div>
 
-        {student.assignments[0] && (
-          <Card
-            variant="workout"
-            eyebrow="Treino ativo"
-            title={student.assignments[0].workout.name}
-            subtitle={`Semana ${student.assignments[0].currentWeek}`}
-            className="mb-4"
-          />
-        )}
+        <Link
+          href={`/trainer/alunos/${student.id}/programa`}
+          className="block bg-navy-light border border-white/10 rounded-control p-4 mb-4"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Programa semanal</p>
+              <p className="text-sm text-white">
+                {student.assignments.length > 0
+                  ? `${student.assignments.length} dia(s) com treino definido`
+                  : 'Nenhum treino definido ainda'}
+              </p>
+            </div>
+            <span className="text-gold-light text-xs">Editar →</span>
+          </div>
+        </Link>
 
         <Card variant="glass" eyebrow="Evolução de carga" title="Histórico" className="mb-4">
           <EvolutionChart data={chartData} />

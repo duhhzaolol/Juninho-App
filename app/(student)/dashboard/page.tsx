@@ -7,7 +7,7 @@ import { StatusCard } from '@/components/shared/StatusCard'
 import { BottomNav } from '@/components/student/BottomNav'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle } from 'lucide-react'
+import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle, Coffee, CheckCircle2 } from 'lucide-react'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -20,23 +20,29 @@ export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
+  const now = new Date()
+  const weekday = now.getDay() // 0=domingo ... 6=sábado
+  const isRestDay = weekday === 0 || weekday === 6
+
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
     include: {
       assignments: {
-        where: { status: 'active' },
+        where: { status: 'active', weekday },
         include: { workout: true },
         take: 1,
       },
-      subscriptions: {
-        where: { status: 'active' },
-        take: 1,
-      },
+      subscriptions: { where: { status: 'active' }, take: 1 },
+      calendarEntries: { where: { date: { gte: startOfToday } }, take: 1 },
     },
   })
   if (!student) redirect('/login')
 
-  const activeWorkout = student.assignments[0]
+  const todaysWorkout = student.assignments[0]
+  const alreadyTrainedToday = student.calendarEntries[0]?.status === 'TRAINED'
   const activeSub = student.subscriptions[0]
   const overdueDays = activeSub?.renewsAt
     ? Math.ceil((Date.now() - activeSub.renewsAt.getTime()) / 86400000)
@@ -67,13 +73,31 @@ export default async function DashboardPage() {
         />
       )}
 
-      {activeWorkout ? (
-        <WorkoutHeroCard
-          workoutId={activeWorkout.workoutId}
-          name={activeWorkout.workout.name}
-          goal={activeWorkout.workout.goal}
-          subtitle={`Semana ${activeWorkout.currentWeek} · Dia ${activeWorkout.currentDay}`}
+      {isRestDay ? (
+        <StatusCard
+          variant="info"
+          icon={<Coffee size={18} />}
+          title="Hoje é dia de descanso"
+          subtitle="Aproveite para recuperar — amanhã tem treino de novo."
+          className="mb-4"
         />
+      ) : todaysWorkout ? (
+        alreadyTrainedToday ? (
+          <StatusCard
+            variant="info"
+            icon={<CheckCircle2 size={18} />}
+            title={`Treino de hoje concluído: ${todaysWorkout.workout.name}`}
+            subtitle="Mandou bem! Amanhã tem mais."
+            className="mb-4"
+          />
+        ) : (
+          <WorkoutHeroCard
+            workoutId={todaysWorkout.workoutId}
+            name={todaysWorkout.workout.name}
+            goal={todaysWorkout.workout.goal}
+            subtitle="Treino de hoje"
+          />
+        )
       ) : (
         <StatusCard
           variant="info"

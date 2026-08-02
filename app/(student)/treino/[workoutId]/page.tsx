@@ -1,8 +1,14 @@
 import Link from 'next/link'
+import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { redirect } from 'next/navigation'
 import { BottomNav } from '@/components/student/BottomNav'
+import { StartWorkoutButton } from '@/components/student/StartWorkoutButton'
 
 export default async function WorkoutPage({ params }: { params: Promise<{ workoutId: string }> }) {
+  const session = await auth()
+  if (!session?.user?.id) redirect('/login')
+
   const { workoutId } = await params
   const workout = await prisma.workout.findUnique({
     where: { id: workoutId },
@@ -13,8 +19,19 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
       },
     },
   })
-
   if (!workout) return null
+
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+
+  const student = await prisma.studentProfile.findUnique({
+    where: { userId: session.user.id },
+    include: {
+      calendarEntries: { where: { date: { gte: startOfToday } }, take: 1 },
+    },
+  })
+
+  const alreadyTrainedToday = student?.calendarEntries[0]?.status === 'TRAINED'
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
@@ -28,12 +45,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
       </div>
 
       {workout.blocks[0] && (
-        <Link
-          href={`/treino/${workout.id}/sessao`}
-          className="block text-center font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control mb-6"
-        >
-          Iniciar treino
-        </Link>
+        <StartWorkoutButton workoutId={workout.id} alreadyTrained={alreadyTrainedToday} />
       )}
 
       <div className="flex flex-col gap-3">

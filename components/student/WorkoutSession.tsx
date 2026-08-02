@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Stepper } from '@/components/shared/Stepper'
+import { CheckCircle2 } from 'lucide-react'
 
 interface ExerciseData {
   id: string
@@ -33,7 +34,6 @@ interface SetState {
 const REMINDER_MS = 10 * 60 * 1000 // 10 minutos sem registrar nada
 
 export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessionProps) {
-  const router = useRouter()
   const [sets, setSets] = useState<SetState[][]>(() =>
     blocks.map((b) =>
       Array.from({ length: b.sets }, () => ({
@@ -48,6 +48,9 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const [showReminder, setShowReminder] = useState(false)
   const [resting, setResting] = useState(false)
   const [restSeconds, setRestSeconds] = useState(0)
+  const [completed, setCompleted] = useState(false)
+  const [completedAt, setCompletedAt] = useState<Date | null>(null)
+  const [finalElapsed, setFinalElapsed] = useState(0)
   const lastActivity = useRef(Date.now())
 
   // Cronômetro do treino inteiro
@@ -113,12 +116,43 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
 
   async function finishWorkout() {
     setFinishing(true)
-    localStorage.removeItem(`workout-start-${workoutId}`)
+    setFinalElapsed(elapsed)
     try {
       await fetch(`/api/workouts/${workoutId}/complete`, { method: 'POST' })
     } finally {
-      router.push('/dashboard')
+      localStorage.removeItem(`workout-start-${workoutId}`)
+      setCompletedAt(new Date())
+      setCompleted(true)
+      setFinishing(false)
     }
+  }
+
+  if (completed && completedAt) {
+    const femm = String(Math.floor(finalElapsed / 60)).padStart(2, '0')
+    const fess = String(finalElapsed % 60).padStart(2, '0')
+
+    return (
+      <main className="min-h-screen bg-navy flex flex-col items-center justify-center px-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-gold/15 flex items-center justify-center mb-4">
+          <CheckCircle2 size={32} className="text-gold-light" />
+        </div>
+        <p className="font-display font-bold text-xl text-white mb-1">Treino concluído! 🎉</p>
+        <p className="text-sm text-white/50 mb-6">
+          {completedAt.toLocaleDateString('pt-BR')} às{' '}
+          {completedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+        </p>
+        <div className="bg-navy-light border border-white/10 rounded-card px-8 py-4 mb-8">
+          <p className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Tempo total</p>
+          <p className="font-display font-bold text-2xl text-gold-light">{femm}:{fess}</p>
+        </div>
+        <Link
+          href="/dashboard"
+          className="w-full font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control text-center"
+        >
+          Voltar ao início
+        </Link>
+      </main>
+    )
   }
 
   const totalSets = sets.flat().length
