@@ -32,7 +32,7 @@ export default async function ProgressPage({
         orderBy: { date: 'asc' },
         include: { exercise: true },
       },
-      progressPhotos: true,
+      progressPhotos: { orderBy: { date: 'asc' } },
       progressEntries: { where: { date: { gte: since } }, orderBy: { date: 'asc' } },
     },
   })
@@ -79,6 +79,13 @@ export default async function ProgressPage({
     .filter((e) => e.weightKg)
     .map((e) => ({ date: e.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }), value: e.weightKg! }))
   const lastWeight = weightData.at(-1)?.value ?? student.weightKg
+
+  const firstPhoto = student.progressPhotos[0]
+    ? { url: student.progressPhotos[0].url, date: student.progressPhotos[0].date.toISOString() }
+    : null
+  const latestPhoto = student.progressPhotos.at(-1)
+    ? { url: student.progressPhotos.at(-1)!.url, date: student.progressPhotos.at(-1)!.date.toISOString() }
+    : null
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
@@ -146,7 +153,7 @@ export default async function ProgressPage({
 
       <FadeIn delay={0.2}>
         <Card variant="glass" eyebrow="Fotos" title="Comparação de progresso" className="mb-4">
-          <PhotoUpload photos={student.progressPhotos} />
+          <PhotoUpload first={firstPhoto} latest={latestPhoto} />
         </Card>
       </FadeIn>
 

@@ -4,18 +4,18 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Photo {
-  tag: string
-  url: string | null
+  url: string
+  date: string
 }
 
-export function PhotoUpload({ photos }: { photos: Photo[] }) {
+export function PhotoUpload({ first, latest }: { first: Photo | null; latest: Photo | null }) {
   const router = useRouter()
-  const tags = ['0', '30', '60', '90']
-  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({})
-  const [savingTag, setSavingTag] = useState<string | null>(null)
-  const [localPreview, setLocalPreview] = useState<Record<string, string>>({})
+  const beforeInputRef = useRef<HTMLInputElement>(null)
+  const currentInputRef = useRef<HTMLInputElement>(null)
+  const [savingSlot, setSavingSlot] = useState<'inicio' | 'atual' | null>(null)
+  const [preview, setPreview] = useState<{ inicio?: string; atual?: string }>({})
 
-  function handleFile(tag: string, e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFile(slot: 'inicio' | 'atual', e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -23,7 +23,6 @@ export function PhotoUpload({ photos }: { photos: Photo[] }) {
     reader.onload = () => {
       const img = new Image()
       img.onload = async () => {
-        // formato retrato 3:4, igual o card já mostra
         const w = 300
         const h = 400
         const canvas = document.createElement('canvas')
@@ -40,15 +39,15 @@ export function PhotoUpload({ photos }: { photos: Photo[] }) {
         ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h)
 
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
-        setLocalPreview((prev) => ({ ...prev, [tag]: dataUrl }))
-        setSavingTag(tag)
+        setPreview((prev) => ({ ...prev, [slot]: dataUrl }))
+        setSavingSlot(slot)
 
         await fetch('/api/progress/photo', {
           method: 'POST',
-          body: JSON.stringify({ tag, url: dataUrl }),
+          body: JSON.stringify({ tag: slot, url: dataUrl }),
         })
 
-        setSavingTag(null)
+        setSavingSlot(null)
         router.refresh()
       }
       img.src = reader.result as string
@@ -56,40 +55,50 @@ export function PhotoUpload({ photos }: { photos: Photo[] }) {
     reader.readAsDataURL(file)
   }
 
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      {tags.map((tag) => {
-        const photo = photos.find((p) => p.tag === tag)
-        const src = localPreview[tag] ?? photo?.url
+  const beforeSrc = preview.inicio ?? first?.url
+  const currentSrc = preview.atual ?? latest?.url
 
-        return (
-          <div key={tag} className="flex flex-col items-center gap-1">
-            <button
-              type="button"
-              onClick={() => inputRefs.current[tag]?.click()}
-              className="w-full aspect-[3/4] rounded-control bg-navy-light border border-white/10 flex items-center justify-center overflow-hidden relative"
-            >
-              {src ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={src} alt={`Foto dia ${tag}`} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-white/20 text-[10px]">+</span>
-              )}
-              {savingTag === tag && (
-                <span className="absolute inset-0 bg-navy/60 flex items-center justify-center text-[10px] text-white">...</span>
-              )}
-            </button>
-            <input
-              ref={(el) => { inputRefs.current[tag] = el }}
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFile(tag, e)}
-              className="hidden"
-            />
-            <span className="text-[10px] text-white/40">{tag === '0' ? 'Antes' : `${tag} dias`}</span>
-          </div>
-        )
-      })}
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-col items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => !beforeSrc && beforeInputRef.current?.click()}
+          className="w-full aspect-[3/4] rounded-control bg-navy-light border border-white/10 flex items-center justify-center overflow-hidden relative"
+        >
+          {beforeSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={beforeSrc} alt="Foto antes" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white/20 text-xs">+</span>
+          )}
+          {savingSlot === 'inicio' && (
+            <span className="absolute inset-0 bg-navy/60 flex items-center justify-center text-[10px] text-white">...</span>
+          )}
+        </button>
+        <input ref={beforeInputRef} type="file" accept="image/*" onChange={(e) => handleFile('inicio', e)} className="hidden" />
+        <span className="text-[10px] text-white/40">Antes{first ? ` · ${new Date(first.date).toLocaleDateString('pt-BR')}` : ''}</span>
+      </div>
+
+      <div className="flex flex-col items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => currentInputRef.current?.click()}
+          className="w-full aspect-[3/4] rounded-control bg-navy-light border border-white/10 flex items-center justify-center overflow-hidden relative"
+        >
+          {currentSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={currentSrc} alt="Foto atual" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white/20 text-xs">+</span>
+          )}
+          {savingSlot === 'atual' && (
+            <span className="absolute inset-0 bg-navy/60 flex items-center justify-center text-[10px] text-white">...</span>
+          )}
+        </button>
+        <input ref={currentInputRef} type="file" accept="image/*" onChange={(e) => handleFile('atual', e)} className="hidden" />
+        <span className="text-[10px] text-white/40">Atual{latest ? ` · ${new Date(latest.date).toLocaleDateString('pt-BR')}` : ' · toque pra atualizar'}</span>
+      </div>
     </div>
   )
 }

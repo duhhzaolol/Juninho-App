@@ -10,20 +10,15 @@ export async function POST(req: Request) {
   if (typeof url !== 'string' || url.length > 400_000) {
     return NextResponse.json({ error: 'invalid image' }, { status: 400 })
   }
-  if (!['0', '30', '60', '90'].includes(tag)) {
-    return NextResponse.json({ error: 'invalid tag' }, { status: 400 })
-  }
 
   const student = await prisma.studentProfile.findUnique({ where: { userId: session.user.id } })
   if (!student) return NextResponse.json({ error: 'not a student' }, { status: 403 })
 
-  // Substitui a foto anterior desse marco (0/30/60/90), se já existir
-  const existing = await prisma.progressPhoto.findFirst({ where: { studentId: student.id, tag } })
-  if (existing) {
-    await prisma.progressPhoto.update({ where: { id: existing.id }, data: { url, date: new Date() } })
-  } else {
-    await prisma.progressPhoto.create({ data: { studentId: student.id, tag, url } })
-  }
+  // Sempre cria um novo registro — nunca sobrescreve, assim guarda o histórico
+  // completo (com data), útil tanto pra progressão quanto pra marketing depois.
+  const created = await prisma.progressPhoto.create({
+    data: { studentId: student.id, tag: tag ?? 'atual', url },
+  })
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json(created)
 }

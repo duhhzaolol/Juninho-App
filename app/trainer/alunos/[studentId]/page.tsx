@@ -14,7 +14,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     include: {
       user: true,
       exerciseLogs: { orderBy: { date: 'asc' } },
-      progressPhotos: true,
+      progressPhotos: { orderBy: { date: 'asc' } },
       assignments: { include: { workout: true }, where: { status: 'active' } },
       subscriptions: { where: { status: 'active' }, include: { plan: true }, take: 1 },
       workoutRatings: { orderBy: { createdAt: 'desc' }, take: 5, include: { workout: true } },
