@@ -12,7 +12,7 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    await signIn('credentials', { email, password, callbackUrl: '/dashboard' })
+    await signIn('credentials', { email, password, callbackUrl: '/' })
     setLoading(false)
   }
 
