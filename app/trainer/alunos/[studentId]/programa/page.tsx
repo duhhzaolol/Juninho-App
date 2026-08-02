@@ -19,22 +19,31 @@ interface Workout {
   name: string
 }
 
+interface Program {
+  id: string
+  name: string
+}
+
 export default function WeeklyProgramPage() {
   const router = useRouter()
   const params = useParams()
   const studentId = params.studentId as string
 
   const [workouts, setWorkouts] = useState<Workout[]>([])
+  const [programs, setPrograms] = useState<Program[]>([])
   const [selection, setSelection] = useState<Record<number, string>>({})
   const [saving, setSaving] = useState(false)
+  const [applying, setApplying] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     Promise.all([
       fetch('/api/workouts').then((r) => r.json()),
+      fetch('/api/programs').then((r) => r.json()),
       fetch(`/api/students/${studentId}/schedule`).then((r) => r.json()),
-    ]).then(([workoutsData, scheduleData]) => {
+    ]).then(([workoutsData, programsData, scheduleData]) => {
       if (Array.isArray(workoutsData)) setWorkouts(workoutsData)
+      if (Array.isArray(programsData)) setPrograms(programsData)
       if (scheduleData?.schedule) {
         const map: Record<number, string> = {}
         for (const item of scheduleData.schedule) map[item.weekday] = item.workoutId
@@ -43,6 +52,18 @@ export default function WeeklyProgramPage() {
       setLoaded(true)
     })
   }, [studentId])
+
+  async function applyProgram(programId: string) {
+    if (!programId) return
+    setApplying(true)
+    const program = await fetch(`/api/programs/${programId}`).then((r) => r.json())
+    const map: Record<number, string> = {}
+    for (const day of program.days ?? []) {
+      if (day.workoutId) map[day.weekday] = day.workoutId
+    }
+    setSelection(map)
+    setApplying(false)
+  }
 
   function setDay(weekday: number, workoutId: string) {
     setSelection((prev) => {
@@ -82,6 +103,23 @@ export default function WeeklyProgramPage() {
 
         {loaded && (
           <div className="flex flex-col gap-3">
+            {programs.length > 0 && (
+              <div className="bg-purple-dark border border-purple-light/30 rounded-control p-3 mb-2">
+                <p className="text-xs text-white/60 mb-2">Aplicar um programa pronto (você ainda pode ajustar antes de salvar)</p>
+                <select
+                  className="w-full bg-navy border border-white/10 rounded-control px-3 py-2 text-white text-sm"
+                  onChange={(e) => applyProgram(e.target.value)}
+                  disabled={applying}
+                  defaultValue=""
+                >
+                  <option value="">Selecione um programa</option>
+                  {programs.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {weekdays.map((day) => (
               <div key={day.value} className="bg-navy-light border border-white/10 rounded-control p-3">
                 <p className="text-xs text-white/50 mb-2">{day.label}</p>

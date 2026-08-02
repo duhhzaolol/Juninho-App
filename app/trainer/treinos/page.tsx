@@ -27,7 +27,10 @@ export default async function TrainerWorkoutsPage() {
       <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Treinos</p>
-          <Link href="/trainer/treinos/criador" className="text-gold-light text-sm">+ Novo treino</Link>
+          <div className="flex gap-4">
+            <Link href="/trainer/treinos/programas" className="text-white/50 text-sm">Programas semanais</Link>
+            <Link href="/trainer/treinos/criador" className="text-gold-light text-sm">+ Novo treino</Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

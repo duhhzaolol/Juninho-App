@@ -52,6 +52,7 @@ model TrainerProfile {
 
   students        StudentProfile[]
   workouts        Workout[]
+  weeklyPrograms  WeeklyProgram[]
   exercises       Exercise[]
   libraryContents LibraryContent[]
   plans           Plan[]
@@ -111,6 +112,7 @@ model Workout {
 
   blocks       WorkoutExercise[]
   assignments  WorkoutAssignment[]
+  programDays  WeeklyProgramDay[]
 }
 
 model WorkoutExercise {
@@ -128,6 +130,26 @@ model WorkoutExercise {
   rpe         Int?
   restSeconds Int?
   notes       String?
+}
+
+model WeeklyProgram {
+  id        String   @id @default(cuid())
+  trainerId String
+  trainer   TrainerProfile @relation(fields: [trainerId], references: [id])
+
+  name      String
+  createdAt DateTime @default(now())
+
+  days      WeeklyProgramDay[]
+}
+
+model WeeklyProgramDay {
+  id        String   @id @default(cuid())
+  programId String
+  program   WeeklyProgram @relation(fields: [programId], references: [id])
+  weekday   Int      // 0=domingo ... 6=sábado
+  workoutId String?
+  workout   Workout? @relation(fields: [workoutId], references: [id])
 }
 
 model WorkoutAssignment {
