@@ -19,7 +19,7 @@ export default async function ProgressPage() {
     },
   })
 
-  if (!student) return null
+  if (!student) redirect('/login')
 
   // Carga total levantada (soma de carga x reps de todos os logs)
   const totalLoad = student.exerciseLogs.reduce((sum, log) => sum + log.loadKg * log.reps, 0)
