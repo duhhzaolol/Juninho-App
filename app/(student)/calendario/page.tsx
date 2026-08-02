@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Flame, Check } from 'lucide-react'
 import { BottomNav } from '@/components/student/BottomNav'
+import { AnimatedBar } from '@/components/shared/AnimatedBar'
 import { cn } from '@/lib/utils'
 
 const monthNames = [
@@ -145,9 +146,7 @@ export default async function CalendarPage({
         <p className="font-display font-bold text-2xl text-white mb-2">
           {trainedLast30}<span className="text-sm text-white/40">/30 dias</span>
         </p>
-        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-          <div className="h-full bg-gold rounded-full" style={{ width: `${(trainedLast30 / 30) * 100}%` }} />
-        </div>
+        <AnimatedBar percent={(trainedLast30 / 30) * 100} />
       </div>
 
       <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-4">

@@ -6,6 +6,8 @@ import { EvolutionChart } from '@/components/student/EvolutionChart'
 import { PhotoComparison } from '@/components/student/PhotoComparison'
 import { BottomNav } from '@/components/student/BottomNav'
 import { PeriodSelect } from '@/components/shared/PeriodSelect'
+import { FadeIn } from '@/components/shared/FadeIn'
+import { AnimatedBar } from '@/components/shared/AnimatedBar'
 import { redirect } from 'next/navigation'
 import { Dumbbell } from 'lucide-react'
 
@@ -75,51 +77,56 @@ export default async function ProgressPage({
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
       <p className="font-display font-bold text-xl text-white mb-4">Progresso</p>
 
-      <div className="mb-4">
-        <p className="text-[11px] text-white/40 mb-1.5">Período</p>
-        <PeriodSelect value={String(periodDays)} />
-      </div>
+      <FadeIn>
+        <div className="mb-4">
+          <p className="text-[11px] text-white/40 mb-1.5">Período</p>
+          <PeriodSelect value={String(periodDays)} />
+        </div>
+      </FadeIn>
 
-      <Card variant="metric" eyebrow="Evolução geral" title={`${evolutionPct >= 0 ? '+' : ''}${evolutionPct}%`} className="mb-4">
-        <p className="text-xs text-white/40 -mt-2 mb-2">de evolução</p>
-        <EvolutionChart data={chartData} />
-      </Card>
+      <FadeIn delay={0.05}>
+        <Card variant="metric" eyebrow="Evolução geral" title={`${evolutionPct >= 0 ? '+' : ''}${evolutionPct}%`} className="mb-4">
+          <p className="text-xs text-white/40 -mt-2 mb-2">de evolução</p>
+          <EvolutionChart data={chartData} />
+        </Card>
+      </FadeIn>
 
       {groupPerformance.length > 0 && (
-        <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-4">
-          <p className="text-[11px] uppercase tracking-wider text-white/40 mb-3">Desempenho por grupo muscular</p>
-          <div className="flex flex-col gap-3">
-            {groupPerformance.map((g) => (
-              <div key={g.group}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-white">{g.group}</span>
-                  <span className="text-sm text-gold-light font-display font-semibold">
-                    {g.pct! >= 0 ? '+' : ''}{g.pct}%
-                  </span>
+        <FadeIn delay={0.1}>
+          <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-4">
+            <p className="text-[11px] uppercase tracking-wider text-white/40 mb-3">Desempenho por grupo muscular</p>
+            <div className="flex flex-col gap-3">
+              {groupPerformance.map((g, i) => (
+                <div key={g.group}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-white">{g.group}</span>
+                    <span className="text-sm text-gold-light font-display font-semibold">
+                      {g.pct! >= 0 ? '+' : ''}{g.pct}%
+                    </span>
+                  </div>
+                  <AnimatedBar percent={(Math.abs(g.pct!) / maxPct) * 100} delay={0.15 + i * 0.06} />
                 </div>
-                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gold rounded-full"
-                    style={{ width: `${Math.min(100, (Math.abs(g.pct!) / maxPct) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </FadeIn>
       )}
 
-      <Card variant="glass" eyebrow="Carga total levantada" title={`${totalLoad.toLocaleString('pt-BR')} kg`} className="mb-4">
-        <div className="flex justify-end -mt-8">
-          <div className="w-10 h-10 rounded-full bg-purple/30 flex items-center justify-center">
-            <Dumbbell size={18} className="text-purple-200" />
+      <FadeIn delay={0.15}>
+        <Card variant="glass" eyebrow="Carga total levantada" title={`${totalLoad.toLocaleString('pt-BR')} kg`} className="mb-4">
+          <div className="flex justify-end -mt-8">
+            <div className="w-10 h-10 rounded-full bg-purple/30 flex items-center justify-center">
+              <Dumbbell size={18} className="text-purple-200" />
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </FadeIn>
 
-      <Card variant="glass" eyebrow="Fotos" title="Comparação de progresso" className="mb-4">
-        <PhotoComparison photos={student.progressPhotos} />
-      </Card>
+      <FadeIn delay={0.2}>
+        <Card variant="glass" eyebrow="Fotos" title="Comparação de progresso" className="mb-4">
+          <PhotoComparison photos={student.progressPhotos} />
+        </Card>
+      </FadeIn>
 
       <BottomNav />
     </main>
