@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { Badge } from '@/components/ui/Badge'
 import { BottomNav } from '@/components/student/BottomNav'
 import { SignOutButton } from '@/components/shared/SignOutButton'
+import { AvatarUpload } from '@/components/student/AvatarUpload'
 import { redirect } from 'next/navigation'
 
 export default async function ProfilePage() {
@@ -21,8 +22,8 @@ export default async function ProfilePage() {
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
       <div className="flex flex-col items-center mb-8">
-        <div className="w-20 h-20 rounded-full bg-purple/40 border-2 border-gold/40 mb-3" />
-        <p className="font-display font-bold text-lg text-white">{student.user.name}</p>
+        <AvatarUpload currentSrc={student.avatarUrl} />
+        <p className="font-display font-bold text-lg text-white mt-3">{student.user.name}</p>
         <p className="text-xs text-white/40">{student.goal ?? 'Objetivo não definido'}</p>
       </div>
 
