@@ -30,6 +30,7 @@ export default async function WorkoutSessionPage({
       sets: b.sets ?? 3,
       targetReps: b.reps ?? '10-12',
       defaultLoad: b.loadKg ?? 0,
+      restSeconds: b.restSeconds ?? 60,
     }))
 
   return <WorkoutSession workoutId={workout.id} workoutName={workout.name} blocks={blocks} />
