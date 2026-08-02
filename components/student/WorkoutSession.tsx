@@ -15,6 +15,7 @@ interface ExerciseBlock {
   sets: number
   targetReps: string
   defaultLoad: number
+  restSeconds: number
 }
 
 interface WorkoutSessionProps {
@@ -45,6 +46,8 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const [elapsed, setElapsed] = useState(0)
   const [finishing, setFinishing] = useState(false)
   const [showReminder, setShowReminder] = useState(false)
+  const [resting, setResting] = useState(false)
+  const [restSeconds, setRestSeconds] = useState(0)
   const lastActivity = useRef(Date.now())
 
   // Cronômetro do treino inteiro
@@ -62,8 +65,18 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     return () => clearInterval(interval)
   }, [workoutId])
 
+  // Cronômetro de descanso entre séries
+  useEffect(() => {
+    if (!resting) return
+    if (restSeconds <= 0) {
+      setResting(false)
+      return
+    }
+    const t = setTimeout(() => setRestSeconds((s) => s - 1), 1000)
+    return () => clearTimeout(t)
+  }, [resting, restSeconds])
+
   // Lembrete: se passar tempo demais sem registrar nenhuma série, avisa
-  // (funciona enquanto o app está aberto — não é uma notificação push de verdade)
   useEffect(() => {
     const check = setInterval(() => {
       if (Date.now() - lastActivity.current > REMINDER_MS) setShowReminder(true)
@@ -89,7 +102,9 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     lastActivity.current = Date.now()
     setShowReminder(false)
 
-    // Salva imediatamente — se a pessoa fechar o app no meio do treino, não perde nada
+    setRestSeconds(blocks[bi].restSeconds)
+    setResting(true)
+
     fetch('/api/progress', {
       method: 'POST',
       body: JSON.stringify({ exerciseId: blocks[bi].exercise.id, loadKg: set.load, reps: set.reps }),
@@ -110,9 +125,11 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const doneSets = sets.flat().filter((s) => s.done).length
   const emm = String(Math.floor(elapsed / 60)).padStart(2, '0')
   const ess = String(elapsed % 60).padStart(2, '0')
+  const rmm = String(Math.floor(restSeconds / 60)).padStart(2, '0')
+  const rss = String(restSeconds % 60).padStart(2, '0')
 
   return (
-    <main className="min-h-screen bg-navy pb-32 px-5 pt-8">
+    <main className="min-h-screen bg-navy pb-40 px-5 pt-8 relative">
       <div className="flex items-center justify-between mb-1">
         <p className="font-display font-bold text-lg text-white">{workoutName}</p>
         <span className="text-xs text-gold-light font-display font-semibold">⏱ {emm}:{ess}</span>
@@ -183,6 +200,13 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
       >
         {finishing ? 'Finalizando...' : 'Terminar treino'}
       </button>
+
+      {resting && (
+        <div className="fixed bottom-6 left-5 right-5 bg-purple-dark border border-purple-light/40 rounded-card p-4 text-center z-10">
+          <p className="text-[10px] uppercase tracking-wider text-white/50 mb-1">Descanso</p>
+          <p className="font-display font-extrabold text-2xl text-gold-light">{rmm}:{rss}</p>
+        </div>
+      )}
     </main>
   )
 }
