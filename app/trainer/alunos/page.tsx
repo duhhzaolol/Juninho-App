@@ -2,12 +2,15 @@ import Link from 'next/link'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Sidebar } from '@/components/trainer/Sidebar'
+import { Avatar } from '@/components/ui/Avatar'
 
 export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams
   const session = await auth()
   const trainer = await prisma.trainerProfile.findUnique({ where: { userId: session?.user?.id } })
   if (!trainer) return null
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
 
   const students = await prisma.studentProfile.findMany({
     where: {
@@ -16,7 +19,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
     },
     include: {
       user: true,
-      calendarEntries: { orderBy: { date: 'desc' }, take: 1 },
+      calendarEntries: { where: { date: { gte: thirtyDaysAgo } } },
     },
   })
 
@@ -41,26 +44,34 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
 
         <div className="flex flex-col gap-2">
           {students.map((student) => {
-            const lastAccess = student.calendarEntries[0]?.date
-            const daysSince = lastAccess ? Math.floor((Date.now() - lastAccess.getTime()) / 86400000) : null
+            const lastEntry = [...student.calendarEntries].sort((a, b) => b.date.getTime() - a.date.getTime())[0]
+            const daysSince = lastEntry ? Math.floor((Date.now() - lastEntry.date.getTime()) / 86400000) : null
+            const trainedDays = student.calendarEntries.filter((e) => e.status === 'TRAINED').length
+            const adherence = Math.round((trainedDays / 30) * 100)
+            const adherenceColor = adherence >= 75 ? 'text-green-400' : adherence >= 40 ? 'text-gold-light' : 'text-red-400'
 
             return (
               <Link
                 key={student.id}
                 href={`/trainer/alunos/${student.id}`}
-                className="flex items-center justify-between bg-navy-light border border-white/10 rounded-control px-4 py-3"
+                className="flex items-center gap-3 bg-navy-light border border-white/10 rounded-control px-4 py-3"
               >
-                <div>
+                <Avatar src={student.avatarUrl} size="sm" />
+                <div className="flex-1">
                   <p className="text-sm text-white">{student.user.name}</p>
                   <p className="text-xs text-white/40">
                     {student.level ?? 'Nível não definido'} · {daysSince !== null ? `${daysSince} dias sem treinar` : 'sem registros'}
                   </p>
                 </div>
-                <span className="text-[10px] uppercase tracking-wide text-gold-light">Ativo</span>
+                <span className={`text-xs font-display font-bold ${adherenceColor}`}>{adherence}%</span>
               </Link>
             )
           })}
         </div>
+
+        {students.length === 0 && (
+          <p className="text-white/40 text-sm">Nenhum aluno encontrado.</p>
+        )}
       </main>
     </div>
   )
