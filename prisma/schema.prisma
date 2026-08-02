@@ -215,6 +215,7 @@ model Subscription {
   planId      String
   plan        Plan     @relation(fields: [planId], references: [id])
 
+  priceCents  Int?
   status      String   @default("active")
   startedAt   DateTime @default(now())
   renewsAt    DateTime?
