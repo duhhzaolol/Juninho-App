@@ -70,16 +70,35 @@ export function EditProfileForm({ initial }: { initial: Initial }) {
       <p className="font-display font-bold text-xl text-white mb-6">Editar informações</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input placeholder="Nome" className={inputClass} value={form.name} onChange={(e) => update('name', e.target.value)} />
-        <input placeholder="Objetivo (ex: Hipertrofia de glúteos)" className={inputClass} value={form.goal} onChange={(e) => update('goal', e.target.value)} />
-
-        <div className="grid grid-cols-3 gap-3">
-          <input placeholder="Peso (kg)" type="number" className={inputClass} value={form.weightKg} onChange={(e) => update('weightKg', e.target.value)} />
-          <input placeholder="Altura (cm)" type="number" className={inputClass} value={form.heightCm} onChange={(e) => update('heightCm', e.target.value)} />
-          <input placeholder="Idade" type="number" className={inputClass} value={form.age} onChange={(e) => update('age', e.target.value)} />
+        <div>
+          <label className="text-xs text-white/40 mb-1 block">Nome</label>
+          <input className={inputClass} value={form.name} onChange={(e) => update('name', e.target.value)} />
         </div>
 
-        <input placeholder="Nível (ex: Iniciante, Intermediário)" className={inputClass} value={form.level} onChange={(e) => update('level', e.target.value)} />
+        <div>
+          <label className="text-xs text-white/40 mb-1 block">Objetivo</label>
+          <input placeholder="Ex: Hipertrofia de glúteos" className={inputClass} value={form.goal} onChange={(e) => update('goal', e.target.value)} />
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="text-xs text-white/40 mb-1 block">Peso (kg)</label>
+            <input type="number" className={inputClass} value={form.weightKg} onChange={(e) => update('weightKg', e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1 block">Altura (cm)</label>
+            <input type="number" className={inputClass} value={form.heightCm} onChange={(e) => update('heightCm', e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1 block">Idade</label>
+            <input type="number" className={inputClass} value={form.age} onChange={(e) => update('age', e.target.value)} />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs text-white/40 mb-1 block">Nível</label>
+          <input placeholder="Ex: Iniciante, Intermediário" className={inputClass} value={form.level} onChange={(e) => update('level', e.target.value)} />
+        </div>
 
         {error && <p className="text-red-400 text-xs">{error}</p>}
 
