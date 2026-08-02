@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Stepper } from '@/components/shared/Stepper'
+import { RestScreen } from '@/components/student/RestScreen'
 import { CheckCircle2, Star } from 'lucide-react'
 
 interface ExerciseData {
@@ -48,6 +49,8 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const [showReminder, setShowReminder] = useState(false)
   const [resting, setResting] = useState(false)
   const [restSeconds, setRestSeconds] = useState(0)
+  const [restTotal, setRestTotal] = useState(0)
+  const [restNextLabel, setRestNextLabel] = useState('')
   const [completed, setCompleted] = useState(false)
   const [completedAt, setCompletedAt] = useState<Date | null>(null)
   const [finalElapsed, setFinalElapsed] = useState(0)
@@ -99,6 +102,14 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     })
   }
 
+  function nextStepLabel(bi: number, si: number) {
+    if (si + 1 < sets[bi].length) return `Série ${si + 2} · ${blocks[bi].exercise.name}`
+    for (let nb = bi + 1; nb < blocks.length; nb++) {
+      if (sets[nb]?.length > 0) return blocks[nb].exercise.name
+    }
+    return 'Último exercício — hora de terminar o treino!'
+  }
+
   function completeSet(bi: number, si: number) {
     const set = sets[bi][si]
     setSets((prev) => {
@@ -109,6 +120,8 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     lastActivity.current = Date.now()
     setShowReminder(false)
 
+    setRestTotal(blocks[bi].restSeconds)
+    setRestNextLabel(nextStepLabel(bi, si))
     setRestSeconds(blocks[bi].restSeconds)
     setResting(true)
 
@@ -211,8 +224,6 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const doneSets = sets.flat().filter((s) => s.done).length
   const emm = String(Math.floor(elapsed / 60)).padStart(2, '0')
   const ess = String(elapsed % 60).padStart(2, '0')
-  const rmm = String(Math.floor(restSeconds / 60)).padStart(2, '0')
-  const rss = String(restSeconds % 60).padStart(2, '0')
 
   return (
     <main className="min-h-screen bg-navy pb-40 px-5 pt-8 relative">
@@ -288,10 +299,12 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
       </button>
 
       {resting && (
-        <div className="fixed bottom-6 left-5 right-5 bg-purple-dark border border-purple-light/40 rounded-card p-4 text-center z-10">
-          <p className="text-[10px] uppercase tracking-wider text-white/50 mb-1">Descanso</p>
-          <p className="font-display font-extrabold text-2xl text-gold-light">{rmm}:{rss}</p>
-        </div>
+        <RestScreen
+          seconds={restSeconds}
+          total={restTotal}
+          nextLabel={restNextLabel}
+          onSkip={() => setResting(false)}
+        />
       )}
     </main>
   )

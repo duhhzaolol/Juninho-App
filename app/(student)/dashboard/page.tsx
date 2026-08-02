@@ -29,23 +29,34 @@ export default async function DashboardPage() {
   const startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
 
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - weekday)
+  weekStart.setHours(0, 0, 0, 0)
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 7)
+
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
     include: {
       assignments: {
-        where: { status: 'active', weekday },
+        where: { status: 'active' },
         include: { workout: true },
-        take: 1,
       },
       subscriptions: { where: { status: 'active' }, take: 1 },
-      calendarEntries: { where: { date: { gte: startOfToday } }, take: 1 },
+      calendarEntries: { where: { date: { gte: weekStart, lt: weekEnd } } },
       trainer: true,
     },
   })
   if (!student) redirect('/login')
 
-  const todaysWorkout = student.assignments[0]
-  const alreadyTrainedToday = student.calendarEntries[0]?.status === 'TRAINED'
+  const todaysWorkout = student.assignments.find((a) => a.weekday === weekday)
+  const weekdayHasWorkout = new Set(student.assignments.map((a) => a.weekday))
+  const trainedThisWeek = new Set(
+    student.calendarEntries.filter((e) => e.status === 'TRAINED').map((e) => new Date(e.date).getDay())
+  )
+  const alreadyTrainedToday = student.calendarEntries.some(
+    (e) => e.status === 'TRAINED' && new Date(e.date).toDateString() === now.toDateString()
+  )
   const activeSub = student.subscriptions[0]
   const overdueDays = activeSub?.renewsAt
     ? Math.ceil((Date.now() - activeSub.renewsAt.getTime()) / 86400000)
@@ -122,6 +133,37 @@ export default async function DashboardPage() {
             className="mb-4"
           />
         )}
+      </FadeIn>
+
+      <FadeIn delay={0.12}>
+        <div className="bg-navy-light border border-white/10 rounded-card p-3 mb-4">
+          <p className="text-[10px] uppercase tracking-wider text-white/40 mb-2 px-1">Resumo semanal</p>
+          <div className="grid grid-cols-7 gap-1">
+            {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((label, i) => {
+              const isToday = i === weekday
+              const isPast = i < weekday
+              const hasWorkout = weekdayHasWorkout.has(i)
+              const trained = trainedThisWeek.has(i)
+
+              return (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-display font-bold
+                      ${trained ? 'bg-gold text-navy' : ''}
+                      ${!trained && hasWorkout && isPast ? 'bg-white/10 text-white/30' : ''}
+                      ${!trained && hasWorkout && !isPast ? 'border border-white/15 text-white/40' : ''}
+                      ${!hasWorkout ? 'text-white/20' : ''}
+                      ${isToday ? 'ring-2 ring-purple-light' : ''}
+                    `}
+                  >
+                    {trained ? '✓' : !hasWorkout ? '·' : ''}
+                  </div>
+                  <span className="text-[9px] text-white/30">{label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </FadeIn>
 
       <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 mt-2">Atividades</p>

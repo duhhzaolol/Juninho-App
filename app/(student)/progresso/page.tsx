@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { EvolutionChart } from '@/components/student/EvolutionChart'
 import { PhotoUpload } from '@/components/student/PhotoUpload'
+import { WeightLogger } from '@/components/student/WeightLogger'
 import { BottomNav } from '@/components/student/BottomNav'
 import { PeriodSelect } from '@/components/shared/PeriodSelect'
 import { FadeIn } from '@/components/shared/FadeIn'
@@ -32,6 +33,7 @@ export default async function ProgressPage({
         include: { exercise: true },
       },
       progressPhotos: true,
+      progressEntries: { where: { date: { gte: since } }, orderBy: { date: 'asc' } },
     },
   })
   if (!student) redirect('/login')
@@ -72,6 +74,11 @@ export default async function ProgressPage({
     .slice(0, 5)
 
   const maxPct = Math.max(1, ...groupPerformance.map((g) => Math.abs(g.pct ?? 0)))
+
+  const weightData = student.progressEntries
+    .filter((e) => e.weightKg)
+    .map((e) => ({ date: e.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }), value: e.weightKg! }))
+  const lastWeight = weightData.at(-1)?.value ?? student.weightKg
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
@@ -120,6 +127,21 @@ export default async function ProgressPage({
             </div>
           </div>
         </Card>
+      </FadeIn>
+
+      <FadeIn delay={0.18}>
+        <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Peso corporal</p>
+              <p className="font-display font-bold text-2xl text-white">
+                {lastWeight ? `${lastWeight} kg` : '—'}
+              </p>
+            </div>
+            <WeightLogger />
+          </div>
+          {weightData.length > 1 && <EvolutionChart data={weightData} />}
+        </div>
       </FadeIn>
 
       <FadeIn delay={0.2}>
