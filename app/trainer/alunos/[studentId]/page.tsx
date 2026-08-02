@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { EvolutionChart } from '@/components/student/EvolutionChart'
 import { PhotoComparison } from '@/components/student/PhotoComparison'
 
@@ -14,6 +15,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       exerciseLogs: { orderBy: { date: 'asc' } },
       progressPhotos: true,
       assignments: { include: { workout: true }, where: { status: 'active' } },
+      subscriptions: { where: { status: 'active' }, include: { plan: true }, take: 1 },
     },
   })
 
@@ -25,6 +27,15 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     byDate.set(key, (byDate.get(key) ?? 0) + log.loadKg * log.reps)
   }
   const chartData = Array.from(byDate.entries()).map(([date, value]) => ({ date, value }))
+
+  const activeSub = student.subscriptions[0]
+  let dueBadge: { color: 'gold' | 'red' | 'green'; label: string } | null = null
+  if (activeSub?.renewsAt) {
+    const daysLeft = Math.ceil((activeSub.renewsAt.getTime() - Date.now()) / 86400000)
+    if (daysLeft < 0) dueBadge = { color: 'red', label: `Vencido há ${Math.abs(daysLeft)}d` }
+    else if (daysLeft <= 7) dueBadge = { color: 'gold', label: `Vence em ${daysLeft}d` }
+    else dueBadge = { color: 'green', label: `Vence em ${daysLeft}d` }
+  }
 
   return (
     <div className="min-h-screen bg-navy flex flex-col md:flex-row">
@@ -41,6 +52,37 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               {student.weightKg ? `${student.weightKg}kg` : ''} {student.heightCm ? `· ${student.heightCm}cm` : ''}
             </p>
           </div>
+        </div>
+
+        <div className="bg-navy-light border border-white/10 rounded-control p-4 mb-4">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[11px] uppercase tracking-wider text-white/40">Financeiro</p>
+            {dueBadge && <Badge color={dueBadge.color as any} label={dueBadge.label} />}
+          </div>
+          {activeSub ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-white">{activeSub.plan.name}</p>
+                <p className="text-xs text-white/40">
+                  {((activeSub.priceCents ?? activeSub.plan.priceCents) / 100).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  })}
+                  {activeSub.renewsAt && ` · vence em ${activeSub.renewsAt.toLocaleDateString('pt-BR')}`}
+                </p>
+              </div>
+              <Link href={`/trainer/alunos/${student.id}/plano`} className="text-gold-light text-xs">
+                Renovar
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-white/40">Nenhum plano ativo registrado</p>
+              <Link href={`/trainer/alunos/${student.id}/plano`} className="text-gold-light text-xs">
+                Registrar plano
+              </Link>
+            </div>
+          )}
         </div>
 
         {student.assignments[0] && (
