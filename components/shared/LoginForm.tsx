@@ -75,10 +75,10 @@ export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null 
         </>
       )}
 
-      <div className="mt-10 flex flex-col items-center gap-2">
-        <p className="text-[10px] text-white/25">Criado por</p>
-        <Image src="/instaby-logo.png" alt="Instaby" width={130} height={43} />
-        <p className="text-[9px] text-white/20">{APP_VERSION}</p>
+      <div className="mt-20 mb-4 flex flex-col items-center gap-2 opacity-40">
+        <p className="text-[10px] text-white/60">Criado por</p>
+        <Image src="/instaby-logo.png" alt="Instaby" width={110} height={37} />
+        <p className="text-[9px] text-white/60">{APP_VERSION}</p>
       </div>
     </main>
   )
