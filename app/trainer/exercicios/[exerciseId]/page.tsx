@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { Sidebar } from '@/components/trainer/Sidebar'
+import { DeleteExerciseButton } from '@/components/trainer/DeleteExerciseButton'
 
 export default async function ExerciseDetailPage({ params }: { params: Promise<{ exerciseId: string }> }) {
   const { exerciseId } = await params
@@ -39,6 +40,13 @@ export default async function ExerciseDetailPage({ params }: { params: Promise<{
             <p className="text-sm text-white/80">{exercise.commonMistakes}</p>
           </div>
         )}
+
+        <div className="flex items-center gap-4 mt-6">
+          <Link href={`/trainer/exercicios/${exercise.id}/editar`} className="text-gold-light text-sm">
+            Editar exercício
+          </Link>
+          <DeleteExerciseButton exerciseId={exercise.id} />
+        </div>
       </main>
     </div>
   )

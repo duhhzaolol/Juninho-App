@@ -7,9 +7,11 @@ import { BlockType } from './BlockTypeMenu'
 export interface WorkoutBlockData {
   id: string
   type: BlockType
+  exerciseId: string | null
   exerciseNames: string[]
   sets: number
   reps: string
+  loadKg: number | null
   restSeconds: number
   notes?: string
 }
@@ -59,7 +61,7 @@ export function WorkoutBlockCard({ block, index, onEdit, onDuplicate, onDelete }
         <p className="text-sm text-white">{block.exerciseNames.join(' + ') || 'Selecionar exercício'}</p>
         {block.type !== 'REST' && (
           <p className="text-xs text-white/40">
-            {block.sets}x {block.reps} · descanso {block.restSeconds}s
+            {block.sets}x {block.reps} {block.loadKg ? `· ${block.loadKg}kg` : ''} · descanso {block.restSeconds}s
           </p>
         )}
       </div>

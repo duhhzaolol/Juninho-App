@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { EvolutionChart } from '@/components/student/EvolutionChart'
-import { PhotoComparison } from '@/components/student/PhotoComparison'
+import { PhotoUpload } from '@/components/student/PhotoUpload'
 import { BottomNav } from '@/components/student/BottomNav'
 import { PeriodSelect } from '@/components/shared/PeriodSelect'
 import { FadeIn } from '@/components/shared/FadeIn'
@@ -124,7 +124,7 @@ export default async function ProgressPage({
 
       <FadeIn delay={0.2}>
         <Card variant="glass" eyebrow="Fotos" title="Comparação de progresso" className="mb-4">
-          <PhotoComparison photos={student.progressPhotos} />
+          <PhotoUpload photos={student.progressPhotos} />
         </Card>
       </FadeIn>
 
