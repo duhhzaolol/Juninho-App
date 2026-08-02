@@ -2,10 +2,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Flame, Check } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flame } from 'lucide-react'
 import { BottomNav } from '@/components/student/BottomNav'
 import { AnimatedBar } from '@/components/shared/AnimatedBar'
-import { cn } from '@/lib/utils'
+import { CalendarGrid } from '@/components/student/CalendarGrid'
 
 const monthNames = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -32,49 +32,56 @@ export default async function CalendarPage({
 
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
-    include: { calendarEntries: true },
+    include: { calendarEntries: { include: { workout: true } } },
   })
   if (!student) return null
 
-  const entryMap = new Map<string, string>()
-  for (const e of student.calendarEntries) entryMap.set(toKey(e.date), e.status)
+  const entries: Record<string, { status: string; workoutName: string | null }> = {}
+  for (const e of student.calendarEntries) {
+    entries[toKey(e.date)] = { status: e.status, workoutName: e.workout?.name ?? null }
+  }
 
   // Grade do mês, completando com dias do mês anterior/seguinte pra fechar as semanas
   const firstDay = new Date(year, displayMonth, 1)
   const startWeekday = firstDay.getDay()
   const daysInMonth = new Date(year, displayMonth + 1, 0).getDate()
 
-  const cells: { date: Date; inMonth: boolean }[] = []
+  const cells: { key: string; day: number; inMonth: boolean }[] = []
   for (let i = 0; i < startWeekday; i++) {
-    cells.push({ date: new Date(year, displayMonth, 1 - (startWeekday - i)), inMonth: false })
+    const d = new Date(year, displayMonth, 1 - (startWeekday - i))
+    cells.push({ key: toKey(d), day: d.getDate(), inMonth: false })
   }
-  for (let d = 1; d <= daysInMonth; d++) cells.push({ date: new Date(year, displayMonth, d), inMonth: true })
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, displayMonth, d)
+    cells.push({ key: toKey(date), day: d, inMonth: true })
+  }
   while (cells.length % 7 !== 0) {
-    const last = cells[cells.length - 1].date
-    cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1), inMonth: false })
+    const [y, m, d] = cells[cells.length - 1].key.split('-').map(Number)
+    const next = new Date(y, m - 1, d + 1)
+    cells.push({ key: toKey(next), day: next.getDate(), inMonth: false })
   }
 
   const todayKey = toKey(now)
 
-  // Frequência e sequência: janela corrida dos últimos 30 dias (a "ficha de 30 dias")
+  // Frequência e sequência: janela corrida dos últimos 30 dias
   const last30Keys: string[] = []
   for (let i = 29; i >= 0; i--) {
     const d = new Date(now)
     d.setDate(d.getDate() - i)
     last30Keys.push(toKey(d))
   }
-  const trainedLast30 = last30Keys.filter((k) => entryMap.get(k) === 'TRAINED').length
+  const trainedLast30 = last30Keys.filter((k) => entries[k]?.status === 'TRAINED').length
 
   let streak = 0
   for (let i = last30Keys.length - 1; i >= 0; i--) {
-    if (entryMap.get(last30Keys[i]) === 'TRAINED') streak++
+    if (entries[last30Keys[i]]?.status === 'TRAINED') streak++
     else break
   }
 
   let bestStreak = 0
   let run = 0
   for (const k of last30Keys) {
-    if (entryMap.get(k) === 'TRAINED') {
+    if (entries[k]?.status === 'TRAINED') {
       run++
       bestStreak = Math.max(bestStreak, run)
     } else {
@@ -107,38 +114,8 @@ export default async function CalendarPage({
           </Link>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {weekDays.map((d) => (
-            <p key={d} className="text-center text-[9px] text-white/30 font-semibold">{d}</p>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-7 gap-1">
-          {cells.map(({ date, inMonth }, i) => {
-            const key = toKey(date)
-            const status = entryMap.get(key)
-            const isToday = key === todayKey
-
-            return (
-              <div key={i} className="flex items-center justify-center aspect-square">
-                <div
-                  className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-display font-semibold',
-                    !inMonth && 'text-white/15',
-                    inMonth && !status && 'text-white/40',
-                    status === 'TRAINED' && 'bg-gold text-navy',
-                    status === 'MISSED' && 'bg-red-500/20 text-red-300',
-                    status === 'CARDIO' && 'bg-purple-600/50 text-white',
-                    status === 'REST' && 'bg-white/10 text-white/40',
-                    isToday && 'ring-2 ring-purple-light ring-offset-2 ring-offset-navy-light'
-                  )}
-                >
-                  {status === 'TRAINED' ? <Check size={14} /> : date.getDate()}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <CalendarGrid cells={cells} entries={entries} todayKey={todayKey} weekDays={weekDays} />
+        <p className="text-[10px] text-white/30 mt-3 text-center">Toca num dia treinado pra ver qual treino foi feito</p>
       </div>
 
       <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-4">
