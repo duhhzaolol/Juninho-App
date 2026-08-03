@@ -37,7 +37,9 @@ export default async function TrainerDashboardPage() {
 
       <main className="flex-1 px-6 py-8 max-w-lg">
         <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-6 flex items-center gap-3">
-          <Avatar src={trainer.avatarUrl} size="lg" ring />
+          <Link href="/trainer/perfil">
+            <Avatar src={trainer.avatarUrl} size="lg" ring />
+          </Link>
           <div className="flex-1">
             <p className="font-display font-bold text-lg text-white">{trainer.user.name}</p>
             <p className="text-xs text-white/40 mb-2">

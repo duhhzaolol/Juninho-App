@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Button } from '@/components/ui/Button'
+import { SignOutButton } from '@/components/shared/SignOutButton'
 
 const inputClass =
   'w-full bg-navy-light border border-white/10 rounded-control px-4 py-3 text-white placeholder:text-white/30 text-sm'
@@ -79,6 +80,10 @@ export default function TrainerProfilePage() {
             </Button>
           </form>
         )}
+
+        <div className="mt-6 pt-6 border-t border-white/10">
+          <SignOutButton className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-red-400 block w-full" />
+        </div>
       </main>
     </div>
   )
