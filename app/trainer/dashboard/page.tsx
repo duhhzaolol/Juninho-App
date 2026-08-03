@@ -5,7 +5,7 @@ import { Sidebar } from '@/components/trainer/Sidebar'
 import { Avatar } from '@/components/ui/Avatar'
 import { ActivityRow } from '@/components/student/ActivityRow'
 import { Badge } from '@/components/ui/Badge'
-import { Users, Dumbbell, MessageCircle, ClipboardList, CreditCard } from 'lucide-react'
+import { Users, Dumbbell, MessageCircle, ClipboardList, CreditCard, ListChecks, BookOpen } from 'lucide-react'
 
 export default async function TrainerDashboardPage() {
   const session = await auth()
@@ -78,6 +78,20 @@ export default async function TrainerDashboardPage() {
           title="Treinos"
           subtitle="Crie e edite treinos"
           href="/trainer/treinos"
+        />
+        <ActivityRow
+          icon={<ListChecks size={20} className="text-white" />}
+          iconBg="bg-purple"
+          title="Exercícios"
+          subtitle="Biblioteca de exercícios"
+          href="/trainer/exercicios"
+        />
+        <ActivityRow
+          icon={<BookOpen size={20} className="text-white" />}
+          iconBg="bg-purple"
+          title="Biblioteca"
+          subtitle="Vídeos, PDFs e conteúdos"
+          href="/trainer/biblioteca"
         />
         <ActivityRow
           icon={<MessageCircle size={20} className="text-white" />}

@@ -9,8 +9,11 @@ const items = [
   { href: '/trainer/dashboard', label: 'Dashboard' },
   { href: '/trainer/alunos', label: 'Alunos' },
   { href: '/trainer/treinos', label: 'Treinos' },
+  { href: '/trainer/exercicios', label: 'Exercícios' },
+  { href: '/trainer/biblioteca', label: 'Biblioteca' },
   { href: '/trainer/mensagens', label: 'Mensagens' },
   { href: '/trainer/relatorios', label: 'Relatórios' },
+  { href: '/trainer/planos', label: 'Planos' },
 ]
 
 export function Sidebar() {
