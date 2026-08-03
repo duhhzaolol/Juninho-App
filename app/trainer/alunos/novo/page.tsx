@@ -7,6 +7,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Button } from '@/components/ui/Button'
 import { PillSelect } from '@/components/trainer/PillSelect'
+import { MultiPillSelect } from '@/components/trainer/MultiPillSelect'
 
 const inputClass =
   'w-full bg-navy-light border border-white/10 rounded-control px-4 py-2.5 text-white placeholder:text-white/30 text-sm'
@@ -30,7 +31,7 @@ export default function NewStudentPage() {
   const [created, setCreated] = useState<{ tempPassword: string; email: string } | null>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [goal, setGoal] = useState('')
+  const [goals, setGoals] = useState<string[]>([])
   const [weightKg, setWeightKg] = useState('')
   const [heightCm, setHeightCm] = useState('')
   const [age, setAge] = useState('')
@@ -47,7 +48,7 @@ export default function NewStudentPage() {
         body: JSON.stringify({
           name,
           email,
-          goal: goal || null,
+          goal: goals.length > 0 ? goals.join(', ') : null,
           weightKg: weightKg ? Number(weightKg) : null,
           heightCm: heightCm ? Number(heightCm) : null,
           age: age ? Number(age) : null,
@@ -60,8 +61,11 @@ export default function NewStudentPage() {
         setCreated({ tempPassword: data.tempPassword, email })
       } else if (res.status === 409) {
         setError('Já existe uma conta com esse e-mail.')
+      } else if (res.status === 401 || res.status === 403) {
+        setError('Sua sessão expirou. Saia e entre de novo antes de tentar cadastrar.')
       } else {
-        setError('Não deu pra cadastrar. Confere os campos e tenta de novo.')
+        const data = await res.json().catch(() => ({}))
+        setError(`Não deu pra cadastrar (erro ${res.status}: ${data.error ?? 'desconhecido'}). Tenta de novo.`)
       }
     } catch {
       setError('Erro de conexão. Tenta de novo.')
@@ -102,7 +106,7 @@ export default function NewStudentPage() {
                   setCreated(null)
                   setName('')
                   setEmail('')
-                  setGoal('')
+                  setGoals([])
                   setLevel('')
                 }}
                 className="text-white/40 text-sm"
@@ -136,7 +140,7 @@ export default function NewStudentPage() {
             </Section>
 
             <Section title="Objetivo">
-              <PillSelect options={GOAL_OPTIONS} value={goal} onChange={setGoal} allowOther />
+              <MultiPillSelect options={GOAL_OPTIONS} values={goals} onChange={setGoals} allowOther />
             </Section>
 
             <Section title="Nível">
