@@ -6,9 +6,22 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Button } from '@/components/ui/Button'
+import { PillSelect } from '@/components/trainer/PillSelect'
 
 const inputClass =
   'w-full bg-navy-light border border-white/10 rounded-control px-4 py-2.5 text-white placeholder:text-white/30 text-sm'
+
+const GOAL_OPTIONS = ['Perda de peso', 'Hipertrofia', 'Definição muscular', 'Alto rendimento', 'Saúde e bem-estar']
+const LEVEL_OPTIONS = ['Iniciante', 'Intermediário', 'Avançado']
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-6">
+      <p className="text-[11px] uppercase tracking-wider text-white/40 mb-3">{title}</p>
+      {children}
+    </div>
+  )
+}
 
 export default function NewStudentPage() {
   const router = useRouter()
@@ -61,7 +74,7 @@ export default function NewStudentPage() {
     <div className="min-h-screen bg-navy flex flex-col md:flex-row">
       <Sidebar />
 
-      <main className="flex-1 px-6 py-8 max-w-md">
+      <main className="flex-1 px-6 py-8 max-w-lg">
         <Link href="/trainer/alunos" className="text-white/50 flex items-center gap-1 text-sm mb-4">
           <ChevronLeft size={18} /> Alunos
         </Link>
@@ -89,6 +102,8 @@ export default function NewStudentPage() {
                   setCreated(null)
                   setName('')
                   setEmail('')
+                  setGoal('')
+                  setLevel('')
                 }}
                 className="text-white/40 text-sm"
               >
@@ -97,32 +112,38 @@ export default function NewStudentPage() {
             </div>
           </>
         ) : (
-          <>
+          <form onSubmit={handleSubmit}>
             <p className="font-display font-bold text-xl text-white mb-6">Novo aluno</p>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input
-                required
-                placeholder="Nome completo"
-                className={inputClass}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                required
-                type="email"
-                placeholder="E-mail"
-                className={inputClass}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                placeholder="Objetivo (ex: Hipertrofia de glúteos)"
-                className={inputClass}
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-              />
+            <Section title="Dados de acesso">
+              <div className="flex flex-col gap-3">
+                <input
+                  required
+                  placeholder="Nome completo"
+                  className={inputClass}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <input
+                  required
+                  type="email"
+                  placeholder="E-mail"
+                  className={inputClass}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </Section>
 
+            <Section title="Objetivo">
+              <PillSelect options={GOAL_OPTIONS} value={goal} onChange={setGoal} allowOther />
+            </Section>
+
+            <Section title="Nível">
+              <PillSelect options={LEVEL_OPTIONS} value={level} onChange={setLevel} />
+            </Section>
+
+            <Section title="Dados físicos (opcional)">
               <div className="grid grid-cols-3 gap-3">
                 <input
                   placeholder="Peso (kg)"
@@ -146,21 +167,14 @@ export default function NewStudentPage() {
                   onChange={(e) => setAge(e.target.value)}
                 />
               </div>
+            </Section>
 
-              <input
-                placeholder="Nível (ex: Iniciante, Intermediário)"
-                className={inputClass}
-                value={level}
-                onChange={(e) => setLevel(e.target.value)}
-              />
+            {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
-              {error && <p className="text-red-400 text-xs">{error}</p>}
-
-              <Button type="submit" loading={saving} fullWidth className="mt-2">
-                Cadastrar aluno
-              </Button>
-            </form>
-          </>
+            <Button type="submit" loading={saving} fullWidth>
+              Cadastrar aluno
+            </Button>
+          </form>
         )}
       </main>
     </div>
