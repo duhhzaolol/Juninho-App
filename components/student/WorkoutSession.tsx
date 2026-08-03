@@ -54,6 +54,7 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const [resting, setResting] = useState(false)
   const [restSeconds, setRestSeconds] = useState(0)
   const [restTotal, setRestTotal] = useState(0)
+  const [restStartTime, setRestStartTime] = useState<number | null>(null)
   const [restNextLabel, setRestNextLabel] = useState('')
   const [completed, setCompleted] = useState(false)
   const [completedAt, setCompletedAt] = useState<Date | null>(null)
@@ -72,19 +73,49 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
       localStorage.setItem(key, start)
     }
     const startTime = Number(start)
-    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000)
-    return () => clearInterval(interval)
+
+    function tick() {
+      setElapsed(Math.floor((Date.now() - startTime) / 1000))
+    }
+    tick()
+    const interval = setInterval(tick, 1000)
+
+    function onVisible() {
+      if (document.visibilityState === 'visible') tick()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [workoutId])
 
   useEffect(() => {
-    if (!resting) return
-    if (restSeconds <= 0) {
-      setResting(false)
-      return
+    if (!resting || restStartTime === null) return
+
+    function tick() {
+      const remaining = restTotal - Math.floor((Date.now() - restStartTime!) / 1000)
+      if (remaining <= 0) {
+        setRestSeconds(0)
+        setResting(false)
+      } else {
+        setRestSeconds(remaining)
+      }
     }
-    const t = setTimeout(() => setRestSeconds((s) => s - 1), 1000)
-    return () => clearTimeout(t)
-  }, [resting, restSeconds])
+    tick()
+    const interval = setInterval(tick, 1000)
+
+    function onVisible() {
+      if (document.visibilityState === 'visible') tick()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [resting, restStartTime, restTotal])
 
   useEffect(() => {
     const check = setInterval(() => {
@@ -121,6 +152,7 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     setRestTotal(blocks[bi].restSeconds)
     setRestNextLabel(nextStepLabel(bi, si))
     setRestSeconds(blocks[bi].restSeconds)
+    setRestStartTime(Date.now())
     setResting(true)
 
     fetch('/api/progress', {
