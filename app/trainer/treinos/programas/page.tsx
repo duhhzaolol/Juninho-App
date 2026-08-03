@@ -30,6 +30,7 @@ export default async function WeeklyProgramsPage() {
 
         <div className="mb-6">
           <SeedGluteos3DButton />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {programs.map((program) => (
