@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { WorkoutBlockData } from './WorkoutBlockCard'
+import { ExercisePicker } from './ExercisePicker'
 
 interface Exercise {
   id: string
@@ -68,12 +69,11 @@ export function BlockEditor({
         <div className="flex flex-col gap-3">
           <div>
             <label className="text-xs text-white/40 mb-1 block">Exercício</label>
-            <select className={inputClass} value={form.exerciseId} onChange={(e) => update('exerciseId', e.target.value)}>
-              <option value="">Selecione um exercício</option>
-              {exercises.map((ex) => (
-                <option key={ex.id} value={ex.id}>{ex.name} ({ex.muscleGroup})</option>
-              ))}
-            </select>
+            <ExercisePicker
+              exercises={exercises}
+              value={form.exerciseId}
+              onChange={(id) => update('exerciseId', id)}
+            />
             {exercises.length === 0 && (
               <p className="text-[11px] text-white/30 mt-1">
                 Nenhum exercício cadastrado ainda — crie um na Biblioteca de Exercícios primeiro.

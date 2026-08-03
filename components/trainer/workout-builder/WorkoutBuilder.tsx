@@ -83,6 +83,16 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
     setEditingBlockId(null)
   }
 
+  async function deleteWorkout() {
+    if (!workoutId) return
+    if (!confirm('Excluir esse treino inteiro? Não dá pra desfazer.')) return
+    setSaving(true)
+    const res = await fetch(`/api/workouts/${workoutId}`, { method: 'DELETE' })
+    setSaving(false)
+    if (res.ok) router.push('/trainer/treinos')
+    else alert('Não deu pra excluir — confere se algum aluno ainda está usando esse treino.')
+  }
+
   async function saveWorkout(asTemplate: boolean) {
     setSaving(true)
     const payload = { name, isTemplate: asTemplate, blocks }
@@ -111,6 +121,15 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
             className="bg-transparent font-display font-bold text-xl text-white placeholder:text-white/30 outline-none"
           />
           <div className="flex gap-2">
+            {isEditing && (
+              <button
+                onClick={deleteWorkout}
+                disabled={saving}
+                className="text-red-400 text-xs px-3 whitespace-nowrap self-center"
+              >
+                Excluir treino
+              </button>
+            )}
             <Button variant="ghost" size="sm" onClick={() => saveWorkout(true)} disabled={saving}>
               Salvar como modelo
             </Button>
