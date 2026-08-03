@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Sidebar } from '@/components/trainer/Sidebar'
+import { SeedExercisesButton } from '@/components/trainer/SeedExercisesButton'
 
 export default async function ExerciseLibraryPage({ searchParams }: { searchParams: Promise<{ grupo?: string }> }) {
   const { grupo } = await searchParams
@@ -26,7 +27,10 @@ export default async function ExerciseLibraryPage({ searchParams }: { searchPara
       <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Biblioteca de exercícios</p>
-          <Link href="/trainer/exercicios/novo" className="text-gold-light text-sm">+ Novo exercício</Link>
+          <div className="flex items-center gap-4">
+            <SeedExercisesButton />
+            <Link href="/trainer/exercicios/novo" className="text-gold-light text-sm">+ Novo exercício</Link>
+          </div>
         </div>
 
         <div className="flex gap-2 mb-6 overflow-x-auto">
