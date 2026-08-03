@@ -113,29 +113,40 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 pb-28">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nome do treino"
-            className="bg-transparent font-display font-bold text-xl text-white placeholder:text-white/30 outline-none"
+            className="w-full bg-transparent font-display font-bold text-xl text-white placeholder:text-white/30 outline-none mb-4"
           />
-          <div className="flex gap-2">
-            {isEditing && (
+
+          <div className="grid grid-cols-3 gap-2">
+            {isEditing ? (
               <button
                 onClick={deleteWorkout}
                 disabled={saving}
-                className="text-red-400 text-xs px-3 whitespace-nowrap self-center"
+                className="text-sm font-display font-semibold py-2.5 rounded-control border border-red-400/40 text-red-400"
               >
                 Excluir treino
               </button>
+            ) : (
+              <div />
             )}
-            <Button variant="ghost" size="sm" onClick={() => saveWorkout(true)} disabled={saving}>
+            <button
+              onClick={() => saveWorkout(true)}
+              disabled={saving}
+              className="text-sm font-display font-semibold py-2.5 rounded-control bg-black border border-white/15 text-white"
+            >
               Salvar como modelo
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => saveWorkout(false)} disabled={saving}>
+            </button>
+            <button
+              onClick={() => saveWorkout(false)}
+              disabled={saving}
+              className="text-sm font-display font-semibold py-2.5 rounded-control bg-gold text-navy"
+            >
               {isEditing ? 'Salvar alterações' : 'Salvar treino'}
-            </Button>
+            </button>
           </div>
         </div>
 
