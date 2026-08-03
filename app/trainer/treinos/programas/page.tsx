@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/trainer/Sidebar'
+import { SeedGluteos3DButton } from '@/components/trainer/SeedGluteos3DButton'
 
 export default async function WeeklyProgramsPage() {
   const session = await auth()
@@ -26,6 +27,9 @@ export default async function WeeklyProgramsPage() {
           <p className="font-display font-bold text-xl text-white">Programas semanais</p>
           <Link href="/trainer/treinos/programas/novo" className="text-gold-light text-sm">+ Novo programa</Link>
         </div>
+
+        <div className="mb-6">
+          <SeedGluteos3DButton />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {programs.map((program) => (
