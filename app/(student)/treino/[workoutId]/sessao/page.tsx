@@ -26,11 +26,14 @@ export default async function WorkoutSessionPage({
         id: b.exercise!.id,
         name: b.exercise!.name,
         muscleGroup: b.exercise!.muscleGroup,
+        videoUrl: b.exercise!.videoUrl,
+        gifUrl: b.exercise!.gifUrl,
       },
       sets: b.sets ?? 3,
       targetReps: b.reps ?? '10-12',
       defaultLoad: b.loadKg ?? 0,
       restSeconds: b.restSeconds ?? 60,
+      notes: b.notes,
     }))
 
   return <WorkoutSession workoutId={workout.id} workoutName={workout.name} blocks={blocks} />

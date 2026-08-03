@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Stepper } from '@/components/shared/Stepper'
 import { RestScreen } from '@/components/student/RestScreen'
-import { CheckCircle2, Star } from 'lucide-react'
+import { CheckCircle2, Star, Play } from 'lucide-react'
 
 interface ExerciseData {
   id: string
   name: string
   muscleGroup: string
+  videoUrl: string | null
+  gifUrl: string | null
 }
 
 interface ExerciseBlock {
@@ -18,6 +20,7 @@ interface ExerciseBlock {
   targetReps: string
   defaultLoad: number
   restSeconds: number
+  notes: string | null
 }
 
 interface WorkoutSessionProps {
@@ -32,7 +35,7 @@ interface SetState {
   done: boolean
 }
 
-const REMINDER_MS = 10 * 60 * 1000 // 10 minutos sem registrar nada
+const REMINDER_MS = 10 * 60 * 1000
 
 export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessionProps) {
   const [sets, setSets] = useState<SetState[][]>(() =>
@@ -44,6 +47,7 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
       }))
     )
   )
+  const [activeIndex, setActiveIndex] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [finishing, setFinishing] = useState(false)
   const [showReminder, setShowReminder] = useState(false)
@@ -60,7 +64,6 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
   const [sendingRating, setSendingRating] = useState(false)
   const lastActivity = useRef(Date.now())
 
-  // Cronômetro do treino inteiro
   useEffect(() => {
     const key = `workout-start-${workoutId}`
     let start = localStorage.getItem(key)
@@ -69,13 +72,10 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
       localStorage.setItem(key, start)
     }
     const startTime = Number(start)
-    const interval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startTime) / 1000))
-    }, 1000)
+    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000)
     return () => clearInterval(interval)
   }, [workoutId])
 
-  // Cronômetro de descanso entre séries
   useEffect(() => {
     if (!resting) return
     if (restSeconds <= 0) {
@@ -86,21 +86,12 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     return () => clearTimeout(t)
   }, [resting, restSeconds])
 
-  // Lembrete: se passar tempo demais sem registrar nenhuma série, avisa
   useEffect(() => {
     const check = setInterval(() => {
       if (Date.now() - lastActivity.current > REMINDER_MS) setShowReminder(true)
     }, 30_000)
     return () => clearInterval(check)
   }, [])
-
-  function updateSet(bi: number, si: number, field: 'load' | 'reps', value: number) {
-    setSets((prev) => {
-      const copy = prev.map((arr) => [...arr])
-      copy[bi][si] = { ...copy[bi][si], [field]: value }
-      return copy
-    })
-  }
 
   function nextStepLabel(bi: number, si: number) {
     if (si + 1 < sets[bi].length) return `Série ${si + 2} · ${blocks[bi].exercise.name}`
@@ -110,13 +101,20 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     return 'Último exercício — hora de terminar o treino!'
   }
 
-  function completeSet(bi: number, si: number) {
-    const set = sets[bi][si]
+  function updateSet(bi: number, si: number, field: 'load' | 'reps', value: number) {
     setSets((prev) => {
       const copy = prev.map((arr) => [...arr])
-      copy[bi][si] = { ...copy[bi][si], done: true }
+      copy[bi][si] = { ...copy[bi][si], [field]: value }
       return copy
     })
+  }
+
+  function completeSet(bi: number, si: number) {
+    const set = sets[bi][si]
+    const updated = sets.map((arr) => [...arr])
+    updated[bi][si] = { ...updated[bi][si], done: true }
+    setSets(updated)
+
     lastActivity.current = Date.now()
     setShowReminder(false)
 
@@ -129,6 +127,11 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
       method: 'POST',
       body: JSON.stringify({ exerciseId: blocks[bi].exercise.id, loadKg: set.load, reps: set.reps }),
     }).catch(() => {})
+
+    const allDoneInBlock = updated[bi].every((s) => s.done)
+    if (allDoneInBlock && bi === activeIndex && bi + 1 < blocks.length) {
+      setActiveIndex(bi + 1)
+    }
   }
 
   async function sendRating() {
@@ -169,6 +172,7 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
           {completedAt.toLocaleDateString('pt-BR')} às{' '}
           {completedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </p>
+
         <div className="bg-navy-light border border-white/10 rounded-card px-8 py-4 mb-6">
           <p className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Tempo total</p>
           <p className="font-display font-bold text-2xl text-gold-light">{femm}:{fess}</p>
@@ -180,10 +184,7 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
             <div className="flex justify-center gap-1 mb-3">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} type="button" onClick={() => setRating(n)}>
-                  <Star
-                    size={28}
-                    className={n <= rating ? 'text-gold fill-gold' : 'text-white/20'}
-                  />
+                  <Star size={28} className={n <= rating ? 'text-gold fill-gold' : 'text-white/20'} />
                 </button>
               ))}
             </div>
@@ -240,54 +241,116 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
         </div>
       )}
 
-      <div className="flex flex-col gap-6 mb-8">
-        {blocks.map((block, bi) => (
-          <div key={block.exercise.id}>
-            <p className="font-display font-semibold text-sm text-white mb-1">
-              {bi + 1}. {block.exercise.name}
-            </p>
-            <p className="text-[11px] text-white/40 mb-2">{block.exercise.muscleGroup}</p>
+      <div className="flex flex-col gap-2 mb-8">
+        {blocks.map((block, bi) => {
+          const blockDone = sets[bi].every((s) => s.done)
+          const isLocked = bi > activeIndex && !blockDone
 
-            <div className="flex flex-col gap-2">
-              {sets[bi].map((set, si) => (
-                <div
-                  key={si}
-                  className={`flex items-center justify-between rounded-control px-3 py-2 border ${
-                    set.done ? 'bg-gold/10 border-gold/30' : 'bg-navy-light border-white/10'
-                  }`}
-                >
-                  <span className="font-display font-bold text-xs text-white/60 w-14 shrink-0">
-                    Série {si + 1}
-                  </span>
-                  <Stepper
-                    value={set.load}
-                    onChange={(v) => updateSet(bi, si, 'load', v)}
-                    step={2.5}
-                    suffix="kg"
-                    disabled={set.done}
-                  />
-                  <Stepper
-                    value={set.reps}
-                    onChange={(v) => updateSet(bi, si, 'reps', v)}
-                    step={1}
-                    suffix="reps"
-                    disabled={set.done}
-                  />
-                  {set.done ? (
-                    <span className="text-[11px] font-semibold text-gold-light w-16 text-right shrink-0">Feita ✓</span>
-                  ) : (
-                    <button
-                      onClick={() => completeSet(bi, si)}
-                      className="text-[11px] font-display font-semibold px-3 py-1.5 rounded-control bg-gold text-navy w-16 shrink-0"
-                    >
-                      Concluir
-                    </button>
-                  )}
+          if (blockDone) {
+            return (
+              <button
+                key={block.exercise.id}
+                onClick={() => setActiveIndex(bi)}
+                className="flex items-center justify-between bg-gold/10 border border-gold/20 rounded-control px-4 py-3 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-gold-light shrink-0" />
+                  <span className="text-sm text-white">{bi + 1}. {block.exercise.name}</span>
                 </div>
-              ))}
+                <span className="text-[11px] text-white/40 shrink-0">revisar</span>
+              </button>
+            )
+          }
+
+          if (isLocked) {
+            return (
+              <div
+                key={block.exercise.id}
+                className="flex items-center bg-white/5 border border-white/5 rounded-control px-4 py-3 opacity-40"
+              >
+                <span className="text-sm text-white/50">{bi + 1}. {block.exercise.name}</span>
+              </div>
+            )
+          }
+
+          // bloco ativo — aberto e interativo
+          return (
+            <div key={block.exercise.id} className="bg-navy-light border border-gold/20 rounded-card p-4">
+              <p className="font-display font-semibold text-sm text-white mb-1">
+                {bi + 1}. {block.exercise.name}
+              </p>
+              <p className="text-[11px] text-white/40 mb-3">{block.exercise.muscleGroup}</p>
+
+              {block.exercise.gifUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={block.exercise.gifUrl}
+                  alt={block.exercise.name}
+                  className="w-full rounded-control mb-3 bg-navy"
+                />
+              ) : block.exercise.videoUrl ? (
+                <a
+                  href={block.exercise.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 h-28 rounded-control bg-navy border border-white/10 mb-3 text-gold-light text-sm"
+                >
+                  <Play size={16} /> Ver vídeo do exercício
+                </a>
+              ) : (
+                <div className="h-24 rounded-control bg-navy border border-white/10 mb-3 flex items-center justify-center text-white/20 text-xs">
+                  Vídeo / GIF do exercício
+                </div>
+              )}
+
+              {block.notes && (
+                <div className="bg-purple-dark/50 border border-purple-light/20 rounded-control px-3 py-2 mb-3">
+                  <p className="text-[10px] uppercase tracking-wide text-purple-200 mb-0.5">Observação do professor</p>
+                  <p className="text-xs text-white/80">{block.notes}</p>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2">
+                {sets[bi].map((set, si) => (
+                  <div
+                    key={si}
+                    className={`flex items-center justify-between rounded-control px-3 py-2 border ${
+                      set.done ? 'bg-gold/10 border-gold/30' : 'bg-navy border-white/10'
+                    }`}
+                  >
+                    <span className="font-display font-bold text-xs text-white/60 w-14 shrink-0">
+                      Série {si + 1}
+                    </span>
+                    <Stepper
+                      value={set.load}
+                      onChange={(v) => updateSet(bi, si, 'load', v)}
+                      step={2.5}
+                      suffix="kg"
+                      disabled={set.done}
+                    />
+                    <Stepper
+                      value={set.reps}
+                      onChange={(v) => updateSet(bi, si, 'reps', v)}
+                      step={1}
+                      suffix="reps"
+                      disabled={set.done}
+                    />
+                    {set.done ? (
+                      <span className="text-[11px] font-semibold text-gold-light w-16 text-right shrink-0">Feita ✓</span>
+                    ) : (
+                      <button
+                        onClick={() => completeSet(bi, si)}
+                        className="text-[11px] font-display font-semibold px-3 py-1.5 rounded-control bg-gold text-navy w-16 shrink-0"
+                      >
+                        Concluir
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <button
