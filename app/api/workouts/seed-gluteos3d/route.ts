@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 const NEW_EXERCISES: { name: string; muscleGroup: string }[] = [
   { name: 'Ostra com Mini Band', muscleGroup: 'Glúteos' },
   { name: 'Passada Lateral com Mini Band', muscleGroup: 'Glúteos' },

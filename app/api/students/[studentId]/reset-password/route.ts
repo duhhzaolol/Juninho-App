@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 
+export const dynamic = 'force-dynamic'
+
 function generateTempPassword() {
   // Ex: "sol-4821" — fácil de ditar por WhatsApp/telefone
   const words = ['sol', 'foco', 'gado', 'leve', 'raio', 'zinc', 'vale', 'roda']

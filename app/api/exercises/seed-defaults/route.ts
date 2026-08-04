@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 const DEFAULT_EXERCISES: { name: string; muscleGroup: string; equipment?: string }[] = [
   // Glúteos e pernas
   { name: 'Agachamento Livre', muscleGroup: 'Glúteos, quadríceps', equipment: 'Barra' },
