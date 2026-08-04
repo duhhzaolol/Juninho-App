@@ -4,23 +4,12 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-interface IncomingBlock {
-  type: string
-  exerciseId: string | null
-  extraExerciseIds?: string[]
-  sets: number
-  reps: string
-  loadKg: number | null
-  restSeconds: number
-  notes?: string
-}
-
 interface IncomingDay {
   weekday: number
   rest: boolean
   existingWorkoutId: string | null
   workoutName: string | null
-  blocks: IncomingBlock[]
+  blocks: any[]
 }
 
 export async function POST(req: Request) {
@@ -50,7 +39,7 @@ export async function POST(req: Request) {
         trainerId: trainer.id,
         name: day.workoutName || name,
         blocks: {
-          create: day.blocks.map((b, i) => ({
+          create: day.blocks.map((b: any, i: number) => ({
             order: i,
             type: b.type,
             exerciseId: b.exerciseId || null,
