@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             restSeconds: b.restSeconds,
             notes: b.notes,
             extraItems: {
-              create: (b.extraExerciseIds ?? []).map((exId, idx) => ({ exerciseId: exId, order: idx })),
+              create: (b.extraExerciseIds ?? []).map((exId: string, idx: number) => ({ exerciseId: exId, order: idx })),
             },
           })),
         },
