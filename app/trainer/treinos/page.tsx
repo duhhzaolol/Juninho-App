@@ -37,8 +37,8 @@ export default async function TrainerWorkoutsPage() {
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Treinos</p>
           <div className="flex gap-4">
-            <Link href="/trainer/treinos/programas" className="text-white/50 text-sm">Programas semanais</Link>
-            <Link href="/trainer/treinos/criador" className="text-gold-light text-sm">+ Novo treino</Link>
+            <Link href="/trainer/treinos/programas" className="text-white/50 text-sm">Ver programas</Link>
+            <Link href="/trainer/treinos/programas/novo" className="text-gold-light text-sm">+ Novo programa</Link>
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export default async function TrainerWorkoutsPage() {
           )}
 
           {workouts.length === 0 && (
-            <p className="text-white/40 text-sm">Nenhum treino criado ainda. Clique em "+ Novo treino" pra começar.</p>
+            <p className="text-white/40 text-sm">Nenhum treino avulso. Clique em "+ Novo programa" pra começar.</p>
           )}
         </div>
       </main>
