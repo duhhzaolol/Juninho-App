@@ -34,7 +34,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ exerc
 
   // Não deixa excluir se algum treino ainda usa esse exercício
   const inUse = await prisma.workoutExercise.findFirst({ where: { exerciseId } })
-  if (inUse) {
+  const inUseAsExtra = await prisma.blockExercise.findFirst({ where: { exerciseId } })
+  if (inUse || inUseAsExtra) {
     return NextResponse.json({ error: 'exercise in use' }, { status: 409 })
   }
 

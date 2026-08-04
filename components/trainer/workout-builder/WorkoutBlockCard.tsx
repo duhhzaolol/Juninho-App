@@ -8,6 +8,7 @@ export interface WorkoutBlockData {
   id: string
   type: BlockType
   exerciseId: string | null
+  extraExerciseIds: string[]
   exerciseNames: string[]
   sets: number
   reps: string

@@ -13,7 +13,10 @@ export default async function WorkoutSessionPage({
     include: {
       blocks: {
         orderBy: { order: 'asc' },
-        include: { exercise: true },
+        include: {
+          exercise: true,
+          extraItems: { orderBy: { order: 'asc' }, include: { exercise: true } },
+        },
       },
     },
   })
@@ -22,13 +25,22 @@ export default async function WorkoutSessionPage({
   const blocks = workout.blocks
     .filter((b) => b.exercise)
     .map((b) => ({
-      exercise: {
-        id: b.exercise!.id,
-        name: b.exercise!.name,
-        muscleGroup: b.exercise!.muscleGroup,
-        videoUrl: b.exercise!.videoUrl,
-        gifUrl: b.exercise!.gifUrl,
-      },
+      exercises: [
+        {
+          id: b.exercise!.id,
+          name: b.exercise!.name,
+          muscleGroup: b.exercise!.muscleGroup,
+          videoUrl: b.exercise!.videoUrl,
+          gifUrl: b.exercise!.gifUrl,
+        },
+        ...b.extraItems.map((it) => ({
+          id: it.exercise.id,
+          name: it.exercise.name,
+          muscleGroup: it.exercise.muscleGroup,
+          videoUrl: it.exercise.videoUrl,
+          gifUrl: it.exercise.gifUrl,
+        })),
+      ],
       sets: b.sets ?? 3,
       targetReps: b.reps ?? '10-12',
       defaultLoad: b.loadKg ?? 0,

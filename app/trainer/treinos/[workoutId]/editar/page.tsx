@@ -10,7 +10,7 @@ export default async function EditWorkoutPage({ params }: { params: Promise<{ wo
     include: {
       blocks: {
         orderBy: { order: 'asc' },
-        include: { exercise: true },
+        include: { exercise: true, extraItems: { orderBy: { order: 'asc' }, include: { exercise: true } } },
       },
     },
   })
@@ -20,7 +20,11 @@ export default async function EditWorkoutPage({ params }: { params: Promise<{ wo
     id: b.id,
     type: b.type,
     exerciseId: b.exerciseId,
-    exerciseNames: b.exercise ? [b.exercise.name] : [],
+    extraExerciseIds: b.extraItems.map((it) => it.exerciseId),
+    exerciseNames: [
+      ...(b.exercise ? [b.exercise.name] : []),
+      ...b.extraItems.map((it) => it.exercise.name),
+    ],
     sets: b.sets ?? 3,
     reps: b.reps ?? '10-12',
     loadKg: b.loadKg,

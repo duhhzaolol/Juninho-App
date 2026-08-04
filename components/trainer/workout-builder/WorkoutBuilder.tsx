@@ -14,7 +14,6 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-ki
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Button } from '@/components/ui/Button'
 import { WorkoutBlockCard, WorkoutBlockData } from './WorkoutBlockCard'
-import { BlockTypeMenu, BlockType } from './BlockTypeMenu'
 import { BlockEditor } from './BlockEditor'
 
 let nextId = 1
@@ -29,7 +28,6 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
   const router = useRouter()
   const [name, setName] = useState(initialName)
   const [blocks, setBlocks] = useState<WorkoutBlockData[]>(initialBlocks)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -47,14 +45,15 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
     })
   }
 
-  function addBlock(type: BlockType) {
+  function addBlock() {
     const newId = `block-${nextId++}`
     setBlocks((prev) => [
       ...prev,
       {
         id: newId,
-        type,
+        type: 'EXERCISE',
         exerciseId: null,
+        extraExerciseIds: [],
         exerciseNames: [],
         sets: 3,
         reps: '10-12',
@@ -62,8 +61,7 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
         restSeconds: 60,
       },
     ])
-    setMenuOpen(false)
-    setEditingBlockId(newId) // já abre pra escolher o exercício
+    setEditingBlockId(newId) // já abre pra montar o bloco
   }
 
   function duplicateBlock(id: string) {
@@ -168,12 +166,11 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
         </DndContext>
 
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setMenuOpen(true)}>
+          <Button variant="ghost" size="sm" onClick={addBlock}>
             + Bloco
           </Button>
         </div>
 
-        {menuOpen && <BlockTypeMenu onSelect={addBlock} onClose={() => setMenuOpen(false)} />}
         {editingBlock && (
           <BlockEditor block={editingBlock} onSave={saveBlockEdit} onClose={() => setEditingBlockId(null)} />
         )}

@@ -44,6 +44,12 @@ export async function POST(req: Request) {
           loadKg: b.loadKg,
           restSeconds: b.restSeconds,
           notes: b.notes,
+          extraItems: {
+            create: (b.extraExerciseIds ?? []).map((exId: string, idx: number) => ({
+              exerciseId: exId,
+              order: idx,
+            })),
+          },
         })),
       },
     },

@@ -97,6 +97,7 @@ model Exercise {
 
   workoutExercises WorkoutExercise[]
   exerciseLogs     ExerciseLog[]
+  blockExtraItems  BlockExercise[]
 }
 
 model Workout {
@@ -133,6 +134,17 @@ model WorkoutExercise {
   rpe         Int?
   restSeconds Int?
   notes       String?
+
+  extraItems  BlockExercise[]
+}
+
+model BlockExercise {
+  id         String @id @default(cuid())
+  blockId    String
+  block      WorkoutExercise @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  order      Int    @default(0)
 }
 
 model WeeklyProgram {

@@ -11,7 +11,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ workoutI
   const { workoutId } = await params
   const workout = await prisma.workout.findUnique({
     where: { id: workoutId },
-    include: { blocks: { orderBy: { order: 'asc' }, include: { exercise: true } } },
+    include: {
+      blocks: {
+        orderBy: { order: 'asc' },
+        include: { exercise: true, extraItems: { orderBy: { order: 'asc' }, include: { exercise: true } } },
+      },
+    },
   })
 
   return NextResponse.json(workout)
@@ -48,6 +53,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ workoutI
           loadKg: b.loadKg,
           restSeconds: b.restSeconds,
           notes: b.notes,
+          extraItems: {
+            create: (b.extraExerciseIds ?? []).map((exId: string, idx: number) => ({
+              exerciseId: exId,
+              order: idx,
+            })),
+          },
         })),
       },
     },

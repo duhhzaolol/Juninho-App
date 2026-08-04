@@ -15,7 +15,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
     include: {
       blocks: {
         orderBy: { order: 'asc' },
-        include: { exercise: true },
+        include: { exercise: true, extraItems: { orderBy: { order: 'asc' }, include: { exercise: true } } },
       },
     },
   })
@@ -57,7 +57,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
           >
             <div>
               <p className="text-sm text-white">
-                {i + 1}. {block.exercise?.name ?? block.type}
+                {i + 1}. {[block.exercise?.name, ...block.extraItems.map((it) => it.exercise.name)].filter(Boolean).join(' + ') || block.type}
               </p>
               <p className="text-xs text-white/40">
                 {block.sets}x{block.reps} {block.loadKg ? `· ${block.loadKg}kg` : ''}

@@ -15,12 +15,12 @@ interface ExerciseData {
 }
 
 interface ExerciseBlock {
-  exercise: ExerciseData
+  exercises: ExerciseData[] // 1 exercício = simples; 2+ = superserie/biset/circuito
   sets: number
   targetReps: string
   defaultLoad: number
   restSeconds: number
-  notes: string | null
+  notes?: string | null
 }
 
 interface WorkoutSessionProps {
@@ -38,13 +38,16 @@ interface SetState {
 const REMINDER_MS = 10 * 60 * 1000
 
 export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessionProps) {
-  const [sets, setSets] = useState<SetState[][]>(() =>
+  // sets[blockIndex][exerciseIndexNoBloco][rodada]
+  const [sets, setSets] = useState<SetState[][][]>(() =>
     blocks.map((b) =>
-      Array.from({ length: b.sets }, () => ({
-        load: b.defaultLoad,
-        reps: parseInt(b.targetReps) || 10,
-        done: false,
-      }))
+      b.exercises.map(() =>
+        Array.from({ length: b.sets }, () => ({
+          load: b.defaultLoad,
+          reps: parseInt(b.targetReps) || 10,
+          done: false,
+        }))
+      )
     )
   )
   const [activeIndex, setActiveIndex] = useState(0)
@@ -124,43 +127,70 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     return () => clearInterval(check)
   }, [])
 
-  function nextStepLabel(bi: number, si: number) {
-    if (si + 1 < sets[bi].length) return `Série ${si + 2} · ${blocks[bi].exercise.name}`
+  function isRoundDone(bi: number, si: number) {
+    return sets[bi].every((exArr) => exArr[si].done)
+  }
+
+  function isBlockDone(bi: number) {
+    return sets[bi].every((exArr) => exArr.every((s) => s.done))
+  }
+
+  // Acha a próxima célula liberada (rodada, exercício) dentro do bloco
+  function nextUp(bi: number): { si: number; exIdx: number } | null {
+    for (let si = 0; si < blocks[bi].sets; si++) {
+      for (let exIdx = 0; exIdx < blocks[bi].exercises.length; exIdx++) {
+        if (!sets[bi][exIdx][si].done) return { si, exIdx }
+      }
+    }
+    return null
+  }
+
+  function nextStepLabel(bi: number, si: number, isLastExerciseOfRound: boolean) {
+    if (!isLastExerciseOfRound) return null // sem descanso entre exercícios da mesma rodada
+    if (si + 1 < blocks[bi].sets) return `Rodada ${si + 2} · ${blocks[bi].exercises[0].name}`
     for (let nb = bi + 1; nb < blocks.length; nb++) {
-      if (sets[nb]?.length > 0) return blocks[nb].exercise.name
+      if (blocks[nb].exercises.length > 0) return blocks[nb].exercises[0].name
     }
     return 'Último exercício — hora de terminar o treino!'
   }
 
-  function updateSet(bi: number, si: number, field: 'load' | 'reps', value: number) {
+  function updateSet(bi: number, exIdx: number, si: number, field: 'load' | 'reps', value: number) {
     setSets((prev) => {
-      const copy = prev.map((arr) => [...arr])
-      copy[bi][si] = { ...copy[bi][si], [field]: value }
+      const copy = prev.map((block) => block.map((arr) => [...arr]))
+      copy[bi][exIdx][si] = { ...copy[bi][exIdx][si], [field]: value }
       return copy
     })
   }
 
-  function completeSet(bi: number, si: number) {
-    const set = sets[bi][si]
-    const updated = sets.map((arr) => [...arr])
-    updated[bi][si] = { ...updated[bi][si], done: true }
+  function completeSet(bi: number, exIdx: number, si: number) {
+    const set = sets[bi][exIdx][si]
+    const updated = sets.map((block) => block.map((arr) => [...arr]))
+    updated[bi][exIdx][si] = { ...updated[bi][exIdx][si], done: true }
     setSets(updated)
 
     lastActivity.current = Date.now()
     setShowReminder(false)
 
-    setRestTotal(blocks[bi].restSeconds)
-    setRestNextLabel(nextStepLabel(bi, si))
-    setRestSeconds(blocks[bi].restSeconds)
-    setRestStartTime(Date.now())
-    setResting(true)
-
     fetch('/api/progress', {
       method: 'POST',
-      body: JSON.stringify({ exerciseId: blocks[bi].exercise.id, loadKg: set.load, reps: set.reps }),
+      body: JSON.stringify({ exerciseId: blocks[bi].exercises[exIdx].id, loadKg: set.load, reps: set.reps }),
     }).catch(() => {})
 
-    const allDoneInBlock = updated[bi].every((s) => s.done)
+    const isLastExerciseOfRound = exIdx === blocks[bi].exercises.length - 1
+    const label = nextStepLabel(bi, si, isLastExerciseOfRound)
+
+    if (isLastExerciseOfRound) {
+      // rodada completa — descansa de verdade
+      setRestTotal(blocks[bi].restSeconds)
+      setRestNextLabel(label ?? '')
+      setRestSeconds(blocks[bi].restSeconds)
+      setRestStartTime(Date.now())
+      setResting(true)
+    }
+    // se não for o último exercício da rodada, segue direto pro próximo (sem descanso) — nada a fazer aqui,
+    // a UI já libera a próxima célula sozinha porque "sets" mudou.
+
+    const allDoneInBlock = updated[bi].every((exArr) => exArr.every((s) => s.done))
     if (allDoneInBlock && bi === activeIndex && bi + 1 < blocks.length) {
       setActiveIndex(bi + 1)
     }
@@ -253,8 +283,8 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     )
   }
 
-  const totalSets = sets.flat().length
-  const doneSets = sets.flat().filter((s) => s.done).length
+  const totalSets = sets.flat(2).length
+  const doneSets = sets.flat(2).filter((s) => s.done).length
   const emm = String(Math.floor(elapsed / 60)).padStart(2, '0')
   const ess = String(elapsed % 60).padStart(2, '0')
 
@@ -275,19 +305,21 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
 
       <div className="flex flex-col gap-2 mb-8">
         {blocks.map((block, bi) => {
-          const blockDone = sets[bi].every((s) => s.done)
+          const blockDone = isBlockDone(bi)
           const isLocked = bi > activeIndex && !blockDone
+          const isMulti = block.exercises.length > 1
+          const title = block.exercises.map((e) => e.name).join(' + ')
 
           if (blockDone) {
             return (
               <button
-                key={block.exercise.id}
+                key={bi}
                 onClick={() => setActiveIndex(bi)}
                 className="flex items-center justify-between bg-gold/10 border border-gold/20 rounded-control px-4 py-3 text-left"
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-gold-light shrink-0" />
-                  <span className="text-sm text-white">{bi + 1}. {block.exercise.name}</span>
+                  <span className="text-sm text-white">{bi + 1}. {title}</span>
                 </div>
                 <span className="text-[11px] text-white/40 shrink-0">revisar</span>
               </button>
@@ -296,33 +328,26 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
 
           if (isLocked) {
             return (
-              <div
-                key={block.exercise.id}
-                className="flex items-center bg-white/5 border border-white/5 rounded-control px-4 py-3 opacity-40"
-              >
-                <span className="text-sm text-white/50">{bi + 1}. {block.exercise.name}</span>
+              <div key={bi} className="flex items-center bg-white/5 border border-white/5 rounded-control px-4 py-3 opacity-40">
+                <span className="text-sm text-white/50">{bi + 1}. {title}</span>
               </div>
             )
           }
 
           // bloco ativo — aberto e interativo
-          return (
-            <div key={block.exercise.id} className="bg-navy-light border border-gold/20 rounded-card p-4">
-              <p className="font-display font-semibold text-sm text-white mb-1">
-                {bi + 1}. {block.exercise.name}
-              </p>
-              <p className="text-[11px] text-white/40 mb-3">{block.exercise.muscleGroup}</p>
+          const up = nextUp(bi)
 
-              {block.exercise.gifUrl ? (
+          return (
+            <div key={bi} className="bg-navy-light border border-gold/20 rounded-card p-4">
+              <p className="font-display font-semibold text-sm text-white mb-1">{bi + 1}. {title}</p>
+              <p className="text-[11px] text-white/40 mb-3">{block.exercises[0].muscleGroup}</p>
+
+              {block.exercises[0].gifUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={block.exercise.gifUrl}
-                  alt={block.exercise.name}
-                  className="w-full rounded-control mb-3 bg-navy"
-                />
-              ) : block.exercise.videoUrl ? (
+                <img src={block.exercises[0].gifUrl} alt={title} className="w-full rounded-control mb-3 bg-navy" />
+              ) : block.exercises[0].videoUrl ? (
                 <a
-                  href={block.exercise.videoUrl}
+                  href={block.exercises[0].videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 h-28 rounded-control bg-navy border border-white/10 mb-3 text-gold-light text-sm"
@@ -342,41 +367,56 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
                 </div>
               )}
 
-              <div className="flex flex-col gap-2">
-                {sets[bi].map((set, si) => (
-                  <div
-                    key={si}
-                    className={`flex items-center justify-between rounded-control px-3 py-2 border ${
-                      set.done ? 'bg-gold/10 border-gold/30' : 'bg-navy border-white/10'
-                    }`}
-                  >
-                    <span className="font-display font-bold text-xs text-white/60 w-14 shrink-0">
-                      Série {si + 1}
-                    </span>
-                    <Stepper
-                      value={set.load}
-                      onChange={(v) => updateSet(bi, si, 'load', v)}
-                      step={2.5}
-                      suffix="kg"
-                      disabled={set.done}
-                    />
-                    <Stepper
-                      value={set.reps}
-                      onChange={(v) => updateSet(bi, si, 'reps', v)}
-                      step={1}
-                      suffix="reps"
-                      disabled={set.done}
-                    />
-                    {set.done ? (
-                      <span className="text-[11px] font-semibold text-gold-light w-16 text-right shrink-0">Feita ✓</span>
-                    ) : (
-                      <button
-                        onClick={() => completeSet(bi, si)}
-                        className="text-[11px] font-display font-semibold px-3 py-1.5 rounded-control bg-gold text-navy w-16 shrink-0"
-                      >
-                        Concluir
-                      </button>
+              <div className="flex flex-col gap-3">
+                {Array.from({ length: block.sets }).map((_, si) => (
+                  <div key={si}>
+                    {isMulti && (
+                      <p className="text-[10px] uppercase tracking-wide text-white/30 mb-1.5">Rodada {si + 1}</p>
                     )}
+                    <div className="flex flex-col gap-2">
+                      {block.exercises.map((ex, exIdx) => {
+                        const set = sets[bi][exIdx][si]
+                        const isNext = up && up.si === si && up.exIdx === exIdx
+
+                        return (
+                          <div
+                            key={exIdx}
+                            className={`flex items-center justify-between rounded-control px-3 py-2 border ${
+                              set.done ? 'bg-gold/10 border-gold/30' : isNext ? 'bg-navy border-white/10' : 'bg-navy/40 border-white/5 opacity-40'
+                            }`}
+                          >
+                            <span className="font-display font-bold text-xs text-white/60 w-20 shrink-0 truncate">
+                              {isMulti ? ex.name : `Série ${si + 1}`}
+                            </span>
+                            <Stepper
+                              value={set.load}
+                              onChange={(v) => updateSet(bi, exIdx, si, 'load', v)}
+                              step={2.5}
+                              suffix="kg"
+                              disabled={!isNext}
+                            />
+                            <Stepper
+                              value={set.reps}
+                              onChange={(v) => updateSet(bi, exIdx, si, 'reps', v)}
+                              step={1}
+                              suffix="reps"
+                              disabled={!isNext}
+                            />
+                            {set.done ? (
+                              <span className="text-[11px] font-semibold text-gold-light w-16 text-right shrink-0">Feita ✓</span>
+                            ) : (
+                              <button
+                                onClick={() => completeSet(bi, exIdx, si)}
+                                disabled={!isNext}
+                                className="text-[11px] font-display font-semibold px-3 py-1.5 rounded-control bg-gold text-navy w-16 shrink-0 disabled:opacity-30"
+                              >
+                                Concluir
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
