@@ -20,6 +20,7 @@ interface Plan {
   id: string
   name: string
   type: string
+  billingType: string
   priceCents: number
 }
 
@@ -32,6 +33,7 @@ export default function RegisterSubscriptionPage() {
   const [selectedPlanId, setSelectedPlanId] = useState('')
   const [price, setPrice] = useState('')
   const [renewsAt, setRenewsAt] = useState('')
+  const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().slice(0, 10))
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -41,6 +43,9 @@ export default function RegisterSubscriptionPage() {
         if (Array.isArray(data)) setPlans(data)
       })
   }, [])
+
+  const selectedPlan = plans.find((p) => p.id === selectedPlanId)
+  const isRecorrente = selectedPlan?.billingType === 'RECORRENTE'
 
   function applyPreset(days: number) {
     const d = new Date()
@@ -62,7 +67,8 @@ export default function RegisterSubscriptionPage() {
       body: JSON.stringify({
         planId: selectedPlanId,
         priceCents: Math.round(parseFloat(price.replace(',', '.')) * 100),
-        renewsAt,
+        renewsAt: isRecorrente ? renewsAt : null,
+        purchaseDate: isRecorrente ? null : purchaseDate,
       }),
     })
     setSaving(false)
@@ -104,28 +110,36 @@ export default function RegisterSubscriptionPage() {
             onChange={(e) => setPrice(e.target.value)}
           />
 
-          <label className="text-xs text-white/40 mt-2">Vence em</label>
-          <div className="flex gap-2 flex-wrap mb-1">
-            {durationPresets.map((preset) => (
-              <button
-                key={preset.days}
-                type="button"
-                onClick={() => applyPreset(preset.days)}
-                className="text-xs bg-navy-light border border-white/10 rounded-control px-3 py-1.5 text-white/70"
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-          <input
-            required
-            type="date"
-            className={inputClass}
-            value={renewsAt}
-            onChange={(e) => setRenewsAt(e.target.value)}
-          />
+          {selectedPlan && isRecorrente && (
+            <>
+              <label className="text-xs text-white/40 mt-2">Vence em</label>
+              <div className="flex gap-2 flex-wrap mb-1">
+                {durationPresets.map((preset) => (
+                  <button
+                    key={preset.days}
+                    type="button"
+                    onClick={() => applyPreset(preset.days)}
+                    className="text-xs bg-navy-light border border-white/10 rounded-control px-3 py-1.5 text-white/70"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <input required type="date" className={inputClass} value={renewsAt} onChange={(e) => setRenewsAt(e.target.value)} />
+            </>
+          )}
 
-          <Button type="submit" loading={saving} fullWidth className="mt-3">
+          {selectedPlan && !isRecorrente && (
+            <>
+              <label className="text-xs text-white/40 mt-2">
+                {selectedPlan.billingType === 'INFLUENCER' ? 'Data do acordo' : 'Data da compra'}
+              </label>
+              <input required type="date" className={inputClass} value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
+              <p className="text-[11px] text-white/30">Compra única — sem vencimento mensal.</p>
+            </>
+          )}
+
+          <Button type="submit" loading={saving} disabled={!selectedPlan} fullWidth className="mt-3">
             Salvar
           </Button>
         </form>

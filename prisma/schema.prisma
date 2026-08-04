@@ -232,6 +232,7 @@ model Plan {
   trainer      TrainerProfile @relation(fields: [trainerId], references: [id])
 
   type         String
+  billingType  String   @default("UNICA") // RECORRENTE | UNICA | INFLUENCER
   name         String
   priceCents   Int
 
@@ -248,7 +249,8 @@ model Subscription {
   priceCents  Int?
   status      String   @default("active")
   startedAt   DateTime @default(now())
-  renewsAt    DateTime?
+  renewsAt    DateTime?    // usado em planos recorrentes
+  purchaseDate DateTime?   // usado em compra única / parceria com influencer
 }
 
 model WorkoutRating {

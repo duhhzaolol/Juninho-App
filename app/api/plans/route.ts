@@ -26,10 +26,10 @@ export async function POST(req: Request) {
   const trainer = await prisma.trainerProfile.findUnique({ where: { userId: session.user.id } })
   if (!trainer) return NextResponse.json({ error: 'not a trainer' }, { status: 403 })
 
-  const { type, name, priceCents } = await req.json()
+  const { type, billingType, name, priceCents } = await req.json()
 
   const plan = await prisma.plan.create({
-    data: { trainerId: trainer.id, type, name, priceCents },
+    data: { trainerId: trainer.id, type, billingType, name, priceCents },
   })
 
   return NextResponse.json(plan)

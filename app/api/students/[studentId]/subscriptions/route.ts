@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ student
   if (!session?.user?.id) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const { studentId } = await params
-  const { planId, priceCents, renewsAt } = await req.json()
+  const { planId, priceCents, renewsAt, purchaseDate } = await req.json()
 
   const trainer = await prisma.trainerProfile.findUnique({ where: { userId: session.user.id } })
   if (!trainer) return NextResponse.json({ error: 'not a trainer' }, { status: 403 })
@@ -29,7 +29,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ student
       studentId,
       planId,
       priceCents,
-      renewsAt: new Date(renewsAt),
+      renewsAt: renewsAt ? new Date(renewsAt) : null,
+      purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
       status: 'active',
     },
   })
