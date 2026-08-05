@@ -1,2 +1,2 @@
 // Incrementa esse número toda vez que uma leva nova de arquivos é entregue.
-export const APP_VERSION = 'v102'
+export const APP_VERSION = 'v103'
