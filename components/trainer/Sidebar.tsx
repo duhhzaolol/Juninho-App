@@ -8,12 +8,16 @@ import { SignOutButton } from '@/components/shared/SignOutButton'
 const items = [
   { href: '/trainer/dashboard', label: 'Dashboard' },
   { href: '/trainer/alunos', label: 'Alunos' },
+  { href: '/trainer/ranking', label: 'Ranking' },
   { href: '/trainer/treinos', label: 'Treinos' },
   { href: '/trainer/exercicios', label: 'Exercícios' },
   { href: '/trainer/biblioteca', label: 'Biblioteca' },
   { href: '/trainer/mensagens', label: 'Mensagens' },
   { href: '/trainer/relatorios', label: 'Relatórios' },
   { href: '/trainer/planos', label: 'Planos' },
+  { href: '/trainer/novidades', label: 'Novidades' },
+  { href: '/trainer/ajuda', label: 'Ajuda' },
+  { href: '/trainer/configuracoes', label: 'Configurações' },
 ]
 
 export function Sidebar() {
