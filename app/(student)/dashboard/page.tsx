@@ -48,6 +48,7 @@ export default async function DashboardPage() {
     },
   })
   if (!student) redirect('/login')
+  if (student.status === 'pending') redirect('/aguardando-aprovacao')
 
   const todaysWorkout = student.assignments.find((a) => a.weekday === weekday)
   const weekdayHasWorkout = new Set(student.assignments.map((a) => a.weekday))

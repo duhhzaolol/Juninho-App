@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { WhatsAppButton } from '@/components/student/WhatsAppButton'
@@ -62,6 +63,10 @@ export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null 
           Entrar
         </Button>
       </form>
+
+      <Link href="/cadastro" className="text-center text-white/40 text-sm mt-5 block">
+        Ainda não é membro? <span className="text-gold-light">Cadastre-se</span>
+      </Link>
 
       {trainerWhatsapp && (
         <>
