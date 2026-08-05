@@ -22,6 +22,12 @@ export async function GET(req: Request) {
     orderBy: { createdAt: 'asc' },
   })
 
+  // Marca como lidas as mensagens que essa pessoa recebeu dessa conversa
+  await prisma.message.updateMany({
+    where: { senderId: withUserId, receiverId: session.user.id, readAt: null },
+    data: { readAt: new Date() },
+  })
+
   return NextResponse.json(messages)
 }
 

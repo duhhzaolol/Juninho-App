@@ -8,7 +8,8 @@ import { BottomNav } from '@/components/student/BottomNav'
 import { FadeIn } from '@/components/shared/FadeIn'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle, Coffee, CheckCircle2, Bell, MessageCircle } from 'lucide-react'
+import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle, Coffee, CheckCircle2, MessageCircle } from 'lucide-react'
+import { NotificationBell } from '@/components/student/NotificationBell'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -87,12 +88,7 @@ export default async function DashboardPage() {
             </p>
             <p className="text-xs text-white/50">{student.goal ?? 'Defina seu objetivo no perfil'}</p>
           </div>
-          <Link href="/notificacoes" className="relative p-2">
-            <Bell size={20} className="text-white/60" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
-            )}
-          </Link>
+          <NotificationBell initialHasUnread={unreadCount > 0} />
         </header>
       </FadeIn>
 
