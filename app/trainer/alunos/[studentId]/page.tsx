@@ -110,6 +110,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
         <Card variant="glass" eyebrow="Fotos" title="Progresso visual" className="mb-4">
           <PhotoComparison photos={student.progressPhotos} />
+          {student.progressPhotos.length > 0 && (
+            <Link href={`/trainer/alunos/${student.id}/fotos`} className="block text-center text-xs text-gold-light mt-3">
+              Ver histórico completo →
+            </Link>
+          )}
         </Card>
 
         {student.workoutRatings.length > 0 && (

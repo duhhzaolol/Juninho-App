@@ -154,6 +154,11 @@ export default async function ProgressPage({
       <FadeIn delay={0.2}>
         <Card variant="glass" eyebrow="Fotos" title="Comparação de progresso" className="mb-4">
           <PhotoUpload first={firstPhoto} latest={latestPhoto} />
+          {student.progressPhotos.length > 0 && (
+            <Link href="/progresso/fotos" className="block text-center text-xs text-gold-light mt-3">
+              Ver histórico completo →
+            </Link>
+          )}
         </Card>
       </FadeIn>
 
