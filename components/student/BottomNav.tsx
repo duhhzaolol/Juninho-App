@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Dumbbell, BarChart3, User } from 'lucide-react'
+import { Home, Dumbbell, BarChart3, MessageCircle, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const items = [
   { href: '/dashboard', label: 'Início', icon: Home },
   { href: '/treino', label: 'Treino', icon: Dumbbell },
   { href: '/progresso', label: 'Progresso', icon: BarChart3 },
+  { href: '/mensagens', label: 'Chat', icon: MessageCircle },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]
 

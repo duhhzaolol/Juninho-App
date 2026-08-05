@@ -6,10 +6,9 @@ import { ActivityRow } from '@/components/student/ActivityRow'
 import { StatusCard } from '@/components/shared/StatusCard'
 import { BottomNav } from '@/components/student/BottomNav'
 import { FadeIn } from '@/components/shared/FadeIn'
-import { WhatsAppButton } from '@/components/student/WhatsAppButton'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle, Coffee, CheckCircle2 } from 'lucide-react'
+import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle, Coffee, CheckCircle2, Bell, MessageCircle } from 'lucide-react'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -48,6 +47,10 @@ export default async function DashboardPage() {
     },
   })
   if (!student) redirect('/login')
+
+  const unreadCount = await prisma.message.count({
+    where: { senderId: student.trainer.userId, receiverId: session.user.id, readAt: null },
+  })
   if (student.status === 'pending') redirect('/aguardando-aprovacao')
 
   const todaysWorkout = student.assignments.find((a) => a.weekday === weekday)
@@ -78,12 +81,18 @@ export default async function DashboardPage() {
           <Link href="/perfil">
             <Avatar src={student.avatarUrl} size="md" ring />
           </Link>
-          <div>
+          <div className="flex-1">
             <p className="font-display font-bold text-lg text-white">
               {greeting()}, {session.user.name?.split(' ')[0] ?? 'Atleta'}
             </p>
             <p className="text-xs text-white/50">{student.goal ?? 'Defina seu objetivo no perfil'}</p>
           </div>
+          <Link href="/notificacoes" className="relative p-2">
+            <Bell size={20} className="text-white/60" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
+            )}
+          </Link>
         </header>
       </FadeIn>
 
@@ -176,7 +185,13 @@ export default async function DashboardPage() {
       ))}
 
       <FadeIn delay={0.35}>
-        <WhatsAppButton number={student.trainer.whatsapp} />
+        <Link
+          href="/mensagens"
+          className="flex items-center justify-center gap-2 bg-purple/15 border border-purple-light/30 text-purple-light rounded-control py-3 text-sm font-display font-semibold mb-4"
+        >
+          <MessageCircle size={16} />
+          Falar com o professor
+        </Link>
       </FadeIn>
 
       <BottomNav />
