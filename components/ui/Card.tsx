@@ -13,7 +13,7 @@ interface CardProps {
 
 const variantStyles: Record<string, string> = {
   workout: 'bg-gradient-to-br from-purple-dark to-navy-light relative overflow-hidden',
-  metric: 'bg-navy-light',
+  metric: 'bg-gradient-to-br from-navy-light to-[#1a1740] relative overflow-hidden',
   glass: 'bg-white/5 backdrop-blur-glass',
   listItem: 'bg-navy-light flex items-center justify-between',
 }
