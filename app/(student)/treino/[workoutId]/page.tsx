@@ -50,9 +50,8 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
 
       <div className="flex flex-col gap-3">
         {workout.blocks.map((block, i) => (
-          <Link
+          <div
             key={block.id}
-            href={`/treino/${workout.id}/exercicio/${block.exerciseId ?? block.id}`}
             className="flex items-center justify-between bg-navy-light border border-white/10 rounded-control px-4 py-3"
           >
             <div>
@@ -63,8 +62,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
                 {block.sets}x{block.reps} {block.loadKg ? `· ${block.loadKg}kg` : ''}
               </p>
             </div>
-            <span className="text-white/30">›</span>
-          </Link>
+          </div>
         ))}
       </div>
 

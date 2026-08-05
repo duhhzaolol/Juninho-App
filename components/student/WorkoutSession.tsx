@@ -275,7 +275,7 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
 
         <Link
           href="/dashboard"
-          className="w-full font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control text-center"
+          className="w-full font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control text-center shadow-[0_0_24px_-4px_rgba(245,179,0,0.55)]"
         >
           Voltar ao início
         </Link>
@@ -428,7 +428,7 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
       <button
         onClick={finishWorkout}
         disabled={finishing}
-        className="w-full font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control"
+        className="w-full font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control shadow-[0_0_24px_-4px_rgba(245,179,0,0.55)]"
       >
         {finishing ? 'Finalizando...' : 'Terminar treino'}
       </button>

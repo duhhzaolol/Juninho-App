@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
+import { PillSelect } from '@/components/trainer/PillSelect'
+import { MultiPillSelect } from '@/components/trainer/MultiPillSelect'
 
 const inputClass =
   'w-full bg-navy-light border border-white/10 rounded-control px-4 py-2.5 text-white placeholder:text-white/30 text-sm'
@@ -18,9 +20,20 @@ interface ExerciseFormData {
   commonMistakes: string
 }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-5">
+      <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">{title}</p>
+      {children}
+    </div>
+  )
+}
+
 export function ExerciseForm({ exerciseId, initial }: { exerciseId?: string; initial?: Partial<ExerciseFormData> }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const [muscleGroupOptions, setMuscleGroupOptions] = useState<string[]>([])
+  const [equipmentOptions, setEquipmentOptions] = useState<string[]>([])
   const [form, setForm] = useState<ExerciseFormData>({
     name: initial?.name ?? '',
     muscleGroup: initial?.muscleGroup ?? '',
@@ -33,6 +46,17 @@ export function ExerciseForm({ exerciseId, initial }: { exerciseId?: string; ini
   })
 
   const isEditing = Boolean(exerciseId)
+
+  const selectedMuscleGroups = form.muscleGroup ? form.muscleGroup.split(',').map((s) => s.trim()).filter(Boolean) : []
+
+  useEffect(() => {
+    fetch('/api/exercises/options')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data.muscleGroups)) setMuscleGroupOptions(data.muscleGroups)
+        if (Array.isArray(data.equipment)) setEquipmentOptions(data.equipment)
+      })
+  }, [])
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -50,48 +74,51 @@ export function ExerciseForm({ exerciseId, initial }: { exerciseId?: string; ini
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div>
-        <label className="text-xs text-white/40 mb-1 block">Nome do exercício</label>
-        <input required className={inputClass} value={form.name} onChange={(e) => update('name', e.target.value)} />
-      </div>
+    <form onSubmit={handleSubmit}>
+      <Section title="Identificação">
+        <input
+          required
+          placeholder="Nome do exercício"
+          className={inputClass}
+          value={form.name}
+          onChange={(e) => update('name', e.target.value)}
+        />
+      </Section>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-white/40 mb-1 block">Grupo muscular</label>
-          <input required className={inputClass} value={form.muscleGroup} onChange={(e) => update('muscleGroup', e.target.value)} />
-        </div>
-        <div>
-          <label className="text-xs text-white/40 mb-1 block">Equipamento</label>
-          <input className={inputClass} value={form.equipment} onChange={(e) => update('equipment', e.target.value)} />
-        </div>
-      </div>
+      <Section title="Grupo muscular">
+        <MultiPillSelect
+          options={muscleGroupOptions}
+          values={selectedMuscleGroups}
+          onChange={(values) => update('muscleGroup', values.join(', '))}
+          allowOther
+        />
+      </Section>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-white/40 mb-1 block">URL do vídeo</label>
-          <input className={inputClass} value={form.videoUrl} onChange={(e) => update('videoUrl', e.target.value)} />
-        </div>
-        <div>
-          <label className="text-xs text-white/40 mb-1 block">URL do GIF</label>
-          <input className={inputClass} value={form.gifUrl} onChange={(e) => update('gifUrl', e.target.value)} />
-        </div>
-      </div>
+      <Section title="Equipamento">
+        <PillSelect
+          options={equipmentOptions}
+          value={form.equipment}
+          onChange={(v) => update('equipment', v)}
+          allowOther
+        />
+      </Section>
 
-      <div>
-        <label className="text-xs text-white/40 mb-1 block">Descrição</label>
-        <textarea rows={2} className={inputClass} value={form.description} onChange={(e) => update('description', e.target.value)} />
-      </div>
-      <div>
-        <label className="text-xs text-white/40 mb-1 block">Execução correta</label>
-        <textarea rows={2} className={inputClass} value={form.correctForm} onChange={(e) => update('correctForm', e.target.value)} />
-      </div>
-      <div>
-        <label className="text-xs text-white/40 mb-1 block">Erros comuns</label>
-        <textarea rows={2} className={inputClass} value={form.commonMistakes} onChange={(e) => update('commonMistakes', e.target.value)} />
-      </div>
+      <Section title="Mídia (opcional)">
+        <div className="grid grid-cols-2 gap-3">
+          <input placeholder="URL do vídeo (YouTube)" className={inputClass} value={form.videoUrl} onChange={(e) => update('videoUrl', e.target.value)} />
+          <input placeholder="URL do GIF" className={inputClass} value={form.gifUrl} onChange={(e) => update('gifUrl', e.target.value)} />
+        </div>
+      </Section>
 
-      <Button type="submit" loading={saving} fullWidth className="mt-2">
+      <Section title="Detalhes (opcional)">
+        <div className="flex flex-col gap-3">
+          <textarea placeholder="Descrição" rows={2} className={inputClass} value={form.description} onChange={(e) => update('description', e.target.value)} />
+          <textarea placeholder="Execução correta" rows={2} className={inputClass} value={form.correctForm} onChange={(e) => update('correctForm', e.target.value)} />
+          <textarea placeholder="Erros comuns" rows={2} className={inputClass} value={form.commonMistakes} onChange={(e) => update('commonMistakes', e.target.value)} />
+        </div>
+      </Section>
+
+      <Button type="submit" loading={saving} disabled={selectedMuscleGroups.length === 0} fullWidth>
         {isEditing ? 'Salvar alterações' : 'Salvar exercício'}
       </Button>
     </form>

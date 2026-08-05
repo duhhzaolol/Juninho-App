@@ -1,13 +1,11 @@
 import { Sidebar } from '@/components/trainer/Sidebar'
-import { WeeklyProgramBuilder } from '@/components/trainer/WeeklyProgramBuilder'
+import { WeeklyWorkoutBuilder } from '@/components/trainer/WeeklyWorkoutBuilder'
 
 export default function NewWeeklyProgramPage() {
   return (
     <div className="min-h-screen bg-navy flex flex-col md:flex-row">
       <Sidebar />
-      <main className="flex-1 px-6 py-8 max-w-lg">
-        <WeeklyProgramBuilder />
-      </main>
+      <WeeklyWorkoutBuilder />
     </div>
   )
 }

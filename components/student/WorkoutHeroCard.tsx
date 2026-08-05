@@ -51,7 +51,7 @@ export function WorkoutHeroCard({ workoutId, name, goal, subtitle }: WorkoutHero
         <p className="text-[11px] uppercase tracking-wider text-gold-light mb-1">{label} · Seu plano atual</p>
         <p className="font-display font-bold text-xl text-white mb-1">{name}</p>
         <p className="text-xs text-white/60 mb-4">{subtitle}</p>
-        <span className="inline-block font-display font-semibold text-xs bg-gold text-navy px-5 py-2.5 rounded-control">
+        <span className="inline-block font-display font-semibold text-xs bg-gold text-navy px-5 py-2.5 rounded-control shadow-[0_0_20px_-4px_rgba(245,179,0,0.6)]">
           Ver plano →
         </span>
       </div>

@@ -71,6 +71,8 @@ model StudentProfile {
   age          Int?
   level        String?
   avatarUrl    String?
+  whatsapp     String?
+  status       String   @default("active") // pending | active
 
   assignments      WorkoutAssignment[]
   exerciseLogs     ExerciseLog[]

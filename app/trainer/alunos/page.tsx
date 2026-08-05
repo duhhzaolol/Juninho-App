@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Avatar } from '@/components/ui/Avatar'
+import { ApproveStudentButton } from '@/components/trainer/ApproveStudentButton'
 
 export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const session = await auth()
@@ -16,9 +17,16 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
 
+  const pendingStudents = await prisma.studentProfile.findMany({
+    where: { trainerId: trainer.id, status: 'pending' },
+    include: { user: true },
+    orderBy: { id: 'desc' },
+  })
+
   const students = await prisma.studentProfile.findMany({
     where: {
       trainerId: trainer.id,
+      status: 'active',
       ...(q ? { user: { name: { contains: q, mode: 'insensitive' } } } : {}),
     },
     include: {
@@ -38,6 +46,28 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
             + Novo aluno
           </Link>
         </div>
+
+        {pendingStudents.length > 0 && (
+          <div className="mb-6">
+            <p className="text-[11px] uppercase tracking-wider text-gold-light mb-3">
+              Pendentes de aprovação ({pendingStudents.length})
+            </p>
+            <div className="flex flex-col gap-2">
+              {pendingStudents.map((student) => (
+                <div
+                  key={student.id}
+                  className="flex items-center justify-between gap-3 bg-gold/5 border border-gold/20 rounded-control px-4 py-3"
+                >
+                  <div>
+                    <p className="text-sm text-white">{student.user.name}</p>
+                    <p className="text-xs text-white/40">{student.user.email}</p>
+                  </div>
+                  <ApproveStudentButton studentId={student.id} name={student.user.name} whatsapp={student.whatsapp} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <form className="mb-4">
           <input
