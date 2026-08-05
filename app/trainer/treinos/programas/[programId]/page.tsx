@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/trainer/Sidebar'
+import { DuplicateProgramButton } from '@/components/trainer/DuplicateProgramButton'
 import { ChevronLeft, ChevronRight, Coffee, Dumbbell } from 'lucide-react'
 
 const weekdays = [
@@ -40,9 +41,12 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
 
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">{program.name}</p>
-          <Link href={`/trainer/treinos/programas/${program.id}/editar`} className="text-gold-light text-sm">
-            Editar dias
-          </Link>
+          <div className="flex items-center gap-4">
+            <DuplicateProgramButton programId={program.id} />
+            <Link href={`/trainer/treinos/programas/${program.id}/editar`} className="text-gold-light text-sm">
+              Editar dias
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">

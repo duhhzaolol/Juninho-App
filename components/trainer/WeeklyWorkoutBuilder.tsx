@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -31,16 +31,12 @@ const orderedWeekdays = [
 
 interface DayData {
   weekday: number
-  mode: 'rest' | 'existing' | 'new'
+  mode: 'rest' | 'new'
   existingWorkoutId: string
   workoutName: string
   blocks: WorkoutBlockData[]
 }
 
-interface ExistingWorkout {
-  id: string
-  name: string
-}
 
 export function WeeklyWorkoutBuilder() {
   const router = useRouter()
@@ -49,19 +45,10 @@ export function WeeklyWorkoutBuilder() {
   const [days, setDays] = useState<DayData[]>(
     orderedWeekdays.map((d) => ({ weekday: d.weekday, mode: 'rest', existingWorkoutId: '', workoutName: '', blocks: [] }))
   )
-  const [existingWorkouts, setExistingWorkouts] = useState<ExistingWorkout[]>([])
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   const sensors = useSensors(useSensor(PointerSensor))
-
-  useEffect(() => {
-    fetch('/api/workouts')
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) setExistingWorkouts(data)
-      })
-  }, [])
 
   const current = days[activeStep]
   const currentInfo = orderedWeekdays[activeStep]
@@ -126,7 +113,7 @@ export function WeeklyWorkoutBuilder() {
         days: days.map((d) => ({
           weekday: d.weekday,
           rest: d.mode === 'rest',
-          existingWorkoutId: d.mode === 'existing' ? d.existingWorkoutId : null,
+          existingWorkoutId: null,
           workoutName: d.mode === 'new' ? (d.workoutName || `${programName} - ${orderedWeekdays.find((w) => w.weekday === d.weekday)?.label}`) : null,
           blocks: d.mode === 'new' ? d.blocks : [],
         })),
@@ -169,7 +156,7 @@ export function WeeklyWorkoutBuilder() {
 
       <p className="font-display font-semibold text-white mb-3">{currentInfo.label}</p>
 
-      <div className="grid grid-cols-3 gap-2 mb-5">
+      <div className="grid grid-cols-2 gap-2 mb-5">
         <button
           onClick={() => updateCurrentDay({ mode: 'rest' })}
           className={`flex flex-col items-center gap-1 py-3 rounded-control border text-xs ${
@@ -180,14 +167,6 @@ export function WeeklyWorkoutBuilder() {
           Descanso
         </button>
         <button
-          onClick={() => updateCurrentDay({ mode: 'existing' })}
-          className={`py-3 rounded-control border text-xs ${
-            current.mode === 'existing' ? 'bg-gold/15 border-gold text-gold-light' : 'bg-navy-light border-white/10 text-white/60'
-          }`}
-        >
-          Usar treino pronto
-        </button>
-        <button
           onClick={() => updateCurrentDay({ mode: 'new' })}
           className={`py-3 rounded-control border text-xs ${
             current.mode === 'new' ? 'bg-gold/15 border-gold text-gold-light' : 'bg-navy-light border-white/10 text-white/60'
@@ -196,19 +175,6 @@ export function WeeklyWorkoutBuilder() {
           Montar treino
         </button>
       </div>
-
-      {current.mode === 'existing' && (
-        <select
-          className="w-full bg-navy-light border border-white/10 rounded-control px-3 py-2.5 text-white text-sm mb-4"
-          value={current.existingWorkoutId}
-          onChange={(e) => updateCurrentDay({ existingWorkoutId: e.target.value })}
-        >
-          <option value="">Selecione um treino</option>
-          {existingWorkouts.map((w) => (
-            <option key={w.id} value={w.id}>{w.name}</option>
-          ))}
-        </select>
-      )}
 
       {current.mode === 'new' && (
         <div className="mb-4">
