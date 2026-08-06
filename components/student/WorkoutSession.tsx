@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Stepper } from '@/components/shared/Stepper'
 import { RestScreen } from '@/components/student/RestScreen'
+import { ShareCard } from '@/components/student/ShareCard'
+import { ShareWorkoutButton } from '@/components/student/ShareWorkoutButton'
 import { CheckCircle2, Star, Play } from 'lucide-react'
 
 interface ExerciseData {
@@ -26,6 +28,7 @@ interface ExerciseBlock {
 interface WorkoutSessionProps {
   workoutId: string
   workoutName: string
+  studentName: string
   blocks: ExerciseBlock[]
 }
 
@@ -37,7 +40,7 @@ interface SetState {
 
 const REMINDER_MS = 10 * 60 * 1000
 
-export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessionProps) {
+export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: WorkoutSessionProps) {
   // sets[blockIndex][exerciseIndexNoBloco][rodada]
   const [sets, setSets] = useState<SetState[][][]>(() =>
     blocks.map((b) =>
@@ -220,25 +223,33 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
     }
   }
 
+  const totalSets = sets.flat(2).length
+  const doneSets = sets.flat(2).filter((s) => s.done).length
+
   if (completed && completedAt) {
     const femm = String(Math.floor(finalElapsed / 60)).padStart(2, '0')
     const fess = String(finalElapsed % 60).padStart(2, '0')
 
     return (
-      <main className="min-h-screen bg-navy flex flex-col items-center justify-center px-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-gold/15 flex items-center justify-center mb-4">
-          <CheckCircle2 size={32} className="text-gold-light" />
-        </div>
+      <main className="min-h-screen bg-navy flex flex-col items-center justify-center px-8 py-10 text-center">
         <p className="font-display font-bold text-xl text-white mb-1">Treino concluído! 🎉</p>
         <p className="text-sm text-white/50 mb-6">
           {completedAt.toLocaleDateString('pt-BR')} às{' '}
           {completedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </p>
 
-        <div className="bg-navy-light border border-white/10 rounded-card px-8 py-4 mb-6">
-          <p className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Tempo total</p>
-          <p className="font-display font-bold text-2xl text-gold-light">{femm}:{fess}</p>
+        <div className="mb-6">
+          <ShareCard
+            workoutName={workoutName}
+            studentName={studentName}
+            timeLabel={`${femm}:${fess}`}
+            dateLabel={completedAt.toLocaleDateString('pt-BR')}
+            totalSets={doneSets}
+          />
         </div>
+
+        <div className="w-full max-w-[320px]">
+          <ShareWorkoutButton />
 
         {!ratingSent ? (
           <div className="w-full bg-navy-light border border-white/10 rounded-card p-4 mb-6">
@@ -279,12 +290,11 @@ export function WorkoutSession({ workoutId, workoutName, blocks }: WorkoutSessio
         >
           Voltar ao início
         </Link>
+        </div>
       </main>
     )
   }
 
-  const totalSets = sets.flat(2).length
-  const doneSets = sets.flat(2).filter((s) => s.done).length
   const emm = String(Math.floor(elapsed / 60)).padStart(2, '0')
   const ess = String(elapsed % 60).padStart(2, '0')
 

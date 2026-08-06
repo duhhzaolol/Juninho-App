@@ -1,3 +1,4 @@
+import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { WorkoutSession } from '@/components/student/WorkoutSession'
 
@@ -6,6 +7,7 @@ export default async function WorkoutSessionPage({
 }: {
   params: Promise<{ workoutId: string }>
 }) {
+  const session = await auth()
   const { workoutId } = await params
 
   const workout = await prisma.workout.findUnique({
@@ -48,5 +50,12 @@ export default async function WorkoutSessionPage({
       notes: b.notes,
     }))
 
-  return <WorkoutSession workoutId={workout.id} workoutName={workout.name} blocks={blocks} />
+  return (
+    <WorkoutSession
+      workoutId={workout.id}
+      workoutName={workout.name}
+      studentName={session?.user?.name?.split(' ')[0] ?? 'Atleta'}
+      blocks={blocks}
+    />
+  )
 }
