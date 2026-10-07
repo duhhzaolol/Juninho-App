@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Dumbbell, ChevronRight } from 'lucide-react'
+import { Gluteos3DSetupCard } from '@/components/trainer/Gluteos3DSetupCard'
 
 const weekdayLetters = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
@@ -29,6 +30,8 @@ export default async function TrainerWorkoutsPage() {
           <p className="font-display font-bold text-xl text-white">Programas de treino</p>
           <Link href="/app/trainer/treinos/programas/novo" className="text-gold-light text-sm">+ Novo programa</Link>
         </div>
+
+        <Gluteos3DSetupCard trainerId={trainer.id} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {programs.map((program) => {

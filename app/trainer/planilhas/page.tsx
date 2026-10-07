@@ -10,6 +10,7 @@ import { CopyField } from '@/components/trainer/CopyField'
 import { tictoWebhookKey } from '@/lib/ticto'
 import { emailEnabled } from '@/lib/email'
 import { formatPrice } from '@/lib/store'
+import { Gluteos3DSetupCard } from '@/components/trainer/Gluteos3DSetupCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,8 +54,10 @@ export default async function TrainerProductsPage() {
           <NewProductButton />
         </div>
         <p className="text-sm text-white/40 mb-6">
-          Cada planilha é uma sequência de semanas. Cada semana é um programa semanal montado em Treinos → Programas.
+          Cada planilha é uma sequência de semanas. Cada semana é um programa semanal montado em Treinos.
         </p>
+
+        <Gluteos3DSetupCard trainerId={trainer.id} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10">
           {products.map((p) => (
@@ -69,9 +72,7 @@ export default async function TrainerProductsPage() {
             </Link>
           ))}
           {products.length === 0 && (
-            <p className="text-white/40 text-sm">
-              Nenhuma planilha ainda. O Glúteos 3D é criado pelo botão em Treinos → Programas semanais.
-            </p>
+            <p className="text-white/40 text-sm">Nenhuma planilha ainda.</p>
           )}
         </div>
 
