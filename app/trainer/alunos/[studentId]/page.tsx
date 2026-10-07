@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { EvolutionChart } from '@/components/student/EvolutionChart'
 import { PhotoComparison } from '@/components/student/PhotoComparison'
 import { ResetPasswordButton } from '@/components/trainer/ResetPasswordButton'
+import { AccessLinkButton } from '@/components/trainer/AccessLinkButton'
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ studentId: string }> }) {
   const { studentId } = await params
@@ -18,6 +19,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       assignments: { include: { workout: true }, where: { status: 'active' } },
       subscriptions: { where: { status: 'active' }, include: { plan: true }, take: 1 },
       workoutRatings: { orderBy: { createdAt: 'desc' }, take: 5, include: { workout: true } },
+      purchases: { include: { product: true }, orderBy: { purchasedAt: 'desc' } },
     },
   })
 
@@ -99,10 +101,34 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   ? `${student.assignments.length} dia(s) com treino definido`
                   : 'Nenhum treino definido ainda'}
               </p>
+              {student.assignments.length === 0 && student.workoutDueAt && (
+                <p className={`text-xs mt-0.5 ${student.workoutDueAt < new Date() ? 'text-red-400' : 'text-gold-light'}`}>
+                  Prazo para liberar: {student.workoutDueAt.toLocaleDateString('pt-BR')}
+                </p>
+              )}
             </div>
             <span className="text-gold-light text-xs">Editar →</span>
           </div>
         </Link>
+
+        {student.purchases.length > 0 && (
+          <div className="bg-navy-light border border-white/10 rounded-control p-4 mb-4">
+            <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Planilhas</p>
+            <div className="flex flex-col gap-2">
+              {student.purchases.map((p) => (
+                <Link key={p.id} href={`/trainer/planilhas/${p.productId}`} className="flex items-center justify-between">
+                  <span className="text-sm text-white">
+                    {p.product.name}
+                    <span className="block text-xs text-white/40">
+                      {p.source === 'manual' ? 'Liberada manualmente' : 'Comprada na Ticto'} em {p.purchasedAt.toLocaleDateString('pt-BR')}
+                    </span>
+                  </span>
+                  <Badge color={p.status === 'active' ? 'green' : 'red'} label={p.status === 'active' ? 'Ativa' : 'Reembolsada'} />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Card variant="glass" eyebrow="Evolução de carga" title="Histórico" className="mb-4">
           <EvolutionChart data={chartData} />
@@ -137,6 +163,19 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <Link href={`/trainer/mensagens?to=${student.userId}`} className="text-gold-light text-sm block mb-4">
           Enviar mensagem →
         </Link>
+
+        <div className="bg-navy-light border border-white/10 rounded-control p-4 mb-4">
+          <p className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Acesso ao app</p>
+          <p className="text-xs text-white/40 mb-3">
+            {student.user.emailVerifiedAt
+              ? `Entra com ${student.user.email}. O link abaixo serve para ele criar uma senha nova.`
+              : `Ainda não criou a senha. Mande o link para ${student.user.email} entrar.`}
+          </p>
+          <AccessLinkButton
+            studentId={student.id}
+            label={student.user.emailVerifiedAt ? 'Gerar link para trocar a senha' : 'Gerar link para criar a senha'}
+          />
+        </div>
 
         <ResetPasswordButton studentId={student.id} />
       </main>

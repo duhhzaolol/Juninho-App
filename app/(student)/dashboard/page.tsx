@@ -10,6 +10,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Dumbbell, BarChart3, Calendar, PlayCircle, Clock3, AlertTriangle, Coffee, CheckCircle2, MessageCircle } from 'lucide-react'
 import { NotificationBell } from '@/components/student/NotificationBell'
+import { StoreCard } from '@/components/student/StoreCard'
+import { getStudentPlan, storeProducts } from '@/lib/store'
 
 function greeting() {
   const hour = new Date().getHours()
@@ -38,10 +40,6 @@ export default async function DashboardPage() {
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
     include: {
-      assignments: {
-        where: { status: 'active' },
-        include: { workout: true },
-      },
       subscriptions: { where: { status: 'active' }, take: 1 },
       calendarEntries: { where: { date: { gte: weekStart, lt: weekEnd } } },
       trainer: true,
@@ -54,8 +52,14 @@ export default async function DashboardPage() {
   })
   if (student.status === 'pending') redirect('/aguardando-aprovacao')
 
-  const todaysWorkout = student.assignments.find((a) => a.weekday === weekday)
-  const weekdayHasWorkout = new Set(student.assignments.map((a) => a.weekday))
+  // Treino da semana: consultoria (montado pelo professor) ou semana atual da planilha comprada
+  const plan = await getStudentPlan(student.id, now)
+  const todaysWorkout = plan.items.find((a) => a.weekday === weekday)
+  const weekdayHasWorkout = new Set(plan.items.map((a) => a.weekday))
+  const isConsultoria = plan.source === 'consultoria' || student.subscriptions.length > 0
+  const store = isConsultoria ? [] : (await storeProducts(student.id)).filter((p) => !p.purchase && p.status !== 'draft')
+  const heroSubtitle =
+    plan.source === 'planilha' ? `${plan.product.name} · semana ${plan.week} de ${plan.totalWeeks}` : 'Treino de hoje'
   const trainedThisWeek = new Set(
     student.calendarEntries.filter((e) => e.status === 'TRAINED').map((e) => new Date(e.date).getDay())
   )
@@ -105,7 +109,7 @@ export default async function DashboardPage() {
       )}
 
       <FadeIn delay={0.1}>
-        {isRestDay ? (
+        {isRestDay && plan.source !== 'none' ? (
           <StatusCard
             variant="info"
             icon={<Coffee size={18} />}
@@ -118,29 +122,54 @@ export default async function DashboardPage() {
             <StatusCard
               variant="info"
               icon={<CheckCircle2 size={18} />}
-              title={`Treino de hoje concluído: ${todaysWorkout.workout.name}`}
+              title={`Treino de hoje concluído: ${todaysWorkout.name}`}
               subtitle="Mandou bem! Amanhã tem mais."
               className="mb-4"
             />
           ) : (
             <WorkoutHeroCard
               workoutId={todaysWorkout.workoutId}
-              name={todaysWorkout.workout.name}
-              goal={todaysWorkout.workout.goal}
-              subtitle="Treino de hoje"
+              name={todaysWorkout.name}
+              goal={todaysWorkout.goal}
+              subtitle={heroSubtitle}
             />
           )
-        ) : (
+        ) : plan.source === 'none' && isConsultoria ? (
           <StatusCard
             variant="info"
             icon={<Clock3 size={18} />}
             title="Seu treino está sendo montado"
-            subtitle="Assim que o professor publicar, ele aparece aqui automaticamente."
+            subtitle={
+              student.workoutDueAt
+                ? `O Juninho libera seu treino até ${student.workoutDueAt.toLocaleDateString('pt-BR')}. Ele aparece aqui automaticamente.`
+                : 'Assim que o professor publicar, ele aparece aqui automaticamente.'
+            }
+            className="mb-4"
+          />
+        ) : plan.source === 'none' ? (
+          <div className="mb-2">
+            <p className="font-display font-bold text-base text-white mb-1">Escolha seu treino para começar</p>
+            <p className="text-xs text-white/50">Planilhas prontas do Juninho, com vídeo de cada exercício.</p>
+          </div>
+        ) : (
+          <StatusCard
+            variant="info"
+            icon={<Coffee size={18} />}
+            title="Sem treino marcado para hoje"
+            subtitle="Pode fazer qualquer treino da semana em outro dia. Veja em Treino."
             className="mb-4"
           />
         )}
       </FadeIn>
 
+      {store.length > 0 && (
+        <FadeIn delay={0.11}>
+          <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 mt-2">Planilhas do Juninho</p>
+          {store.map((item) => <StoreCard key={item.slug} item={item} />)}
+        </FadeIn>
+      )}
+
+      {plan.source !== 'none' && (
       <FadeIn delay={0.12}>
         <div className="bg-navy-light border border-white/10 rounded-card p-3 mb-4">
           <p className="text-[10px] uppercase tracking-wider text-white/40 mb-2 px-1">Resumo semanal</p>
@@ -171,6 +200,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       </FadeIn>
+      )}
 
       <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 mt-2">Atividades</p>
 

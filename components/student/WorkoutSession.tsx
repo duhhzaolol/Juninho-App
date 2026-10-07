@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Stepper } from '@/components/shared/Stepper'
-import { RestScreen } from '@/components/student/RestScreen'
+import { ExerciseMedia } from '@/components/student/ExerciseMedia'
 import { ShareCard } from '@/components/student/ShareCard'
 import { ShareWorkoutButton } from '@/components/student/ShareWorkoutButton'
-import { CheckCircle2, Star, Play } from 'lucide-react'
+import { CheckCircle2, Star, Timer } from 'lucide-react'
 
 interface ExerciseData {
   id: string
@@ -21,13 +21,14 @@ interface ExerciseBlock {
   sets: number
   targetReps: string
   defaultLoad: number
-  restSeconds: number
+  restSeconds: number | null
   notes?: string | null
 }
 
 interface WorkoutSessionProps {
   workoutId: string
   workoutName: string
+  subtitle?: string | null
   studentName: string
   blocks: ExerciseBlock[]
 }
@@ -40,7 +41,15 @@ interface SetState {
 
 const REMINDER_MS = 10 * 60 * 1000
 
-export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: WorkoutSessionProps) {
+// Formata o descanso definido pelo professor: 90 -> "1min30", 60 -> "1min", 45 -> "45s"
+function formatRest(seconds: number) {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  if (m === 0) return `${s}s`
+  return s === 0 ? `${m}min` : `${m}min${String(s).padStart(2, '0')}`
+}
+
+export function WorkoutSession({ workoutId, workoutName, subtitle, studentName, blocks }: WorkoutSessionProps) {
   // sets[blockIndex][exerciseIndexNoBloco][rodada]
   const [sets, setSets] = useState<SetState[][][]>(() =>
     blocks.map((b) =>
@@ -57,11 +66,8 @@ export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: 
   const [elapsed, setElapsed] = useState(0)
   const [finishing, setFinishing] = useState(false)
   const [showReminder, setShowReminder] = useState(false)
-  const [resting, setResting] = useState(false)
-  const [restSeconds, setRestSeconds] = useState(0)
-  const [restTotal, setRestTotal] = useState(0)
-  const [restStartTime, setRestStartTime] = useState<number | null>(null)
-  const [restNextLabel, setRestNextLabel] = useState('')
+  // qual exercício do bloco está com o vídeo aberto (bi-set tem 2)
+  const [mediaIdx, setMediaIdx] = useState<Record<number, number>>({})
   const [completed, setCompleted] = useState(false)
   const [completedAt, setCompletedAt] = useState<Date | null>(null)
   const [finalElapsed, setFinalElapsed] = useState(0)
@@ -98,32 +104,6 @@ export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: 
   }, [workoutId])
 
   useEffect(() => {
-    if (!resting || restStartTime === null) return
-
-    function tick() {
-      const remaining = restTotal - Math.floor((Date.now() - restStartTime!) / 1000)
-      if (remaining <= 0) {
-        setRestSeconds(0)
-        setResting(false)
-      } else {
-        setRestSeconds(remaining)
-      }
-    }
-    tick()
-    const interval = setInterval(tick, 1000)
-
-    function onVisible() {
-      if (document.visibilityState === 'visible') tick()
-    }
-    document.addEventListener('visibilitychange', onVisible)
-
-    return () => {
-      clearInterval(interval)
-      document.removeEventListener('visibilitychange', onVisible)
-    }
-  }, [resting, restStartTime, restTotal])
-
-  useEffect(() => {
     const check = setInterval(() => {
       if (Date.now() - lastActivity.current > REMINDER_MS) setShowReminder(true)
     }, 30_000)
@@ -148,15 +128,6 @@ export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: 
     return null
   }
 
-  function nextStepLabel(bi: number, si: number, isLastExerciseOfRound: boolean) {
-    if (!isLastExerciseOfRound) return null // sem descanso entre exercícios da mesma rodada
-    if (si + 1 < blocks[bi].sets) return `Rodada ${si + 2} · ${blocks[bi].exercises[0].name}`
-    for (let nb = bi + 1; nb < blocks.length; nb++) {
-      if (blocks[nb].exercises.length > 0) return blocks[nb].exercises[0].name
-    }
-    return 'Último exercício — hora de terminar o treino!'
-  }
-
   function updateSet(bi: number, exIdx: number, si: number, field: 'load' | 'reps', value: number) {
     setSets((prev) => {
       const copy = prev.map((block) => block.map((arr) => [...arr]))
@@ -179,19 +150,8 @@ export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: 
       body: JSON.stringify({ exerciseId: blocks[bi].exercises[exIdx].id, loadKg: set.load, reps: set.reps }),
     }).catch(() => {})
 
-    const isLastExerciseOfRound = exIdx === blocks[bi].exercises.length - 1
-    const label = nextStepLabel(bi, si, isLastExerciseOfRound)
-
-    if (isLastExerciseOfRound) {
-      // rodada completa — descansa de verdade
-      setRestTotal(blocks[bi].restSeconds)
-      setRestNextLabel(label ?? '')
-      setRestSeconds(blocks[bi].restSeconds)
-      setRestStartTime(Date.now())
-      setResting(true)
-    }
-    // se não for o último exercício da rodada, segue direto pro próximo (sem descanso) — nada a fazer aqui,
-    // a UI já libera a próxima célula sozinha porque "sets" mudou.
+    // Sem cronômetro de descanso: em web app ele não avisa quando o celular está bloqueado.
+    // O tempo de descanso aparece escrito no bloco e no topo do treino.
 
     const allDoneInBlock = updated[bi].every((exArr) => exArr.every((s) => s.done))
     if (allDoneInBlock && bi === activeIndex && bi + 1 < blocks.length) {
@@ -301,9 +261,10 @@ export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: 
   return (
     <main className="min-h-screen bg-navy pb-40 px-5 pt-8 relative">
       <div className="flex items-center justify-between mb-1">
-        <p className="font-display font-bold text-lg text-white">{workoutName}</p>
-        <span className="text-xs text-gold-light font-display font-semibold">⏱ {emm}:{ess}</span>
+        <p className="font-display font-bold text-lg text-white break-words [overflow-wrap:anywhere] min-w-0">{workoutName}</p>
+        <span className="text-xs text-gold-light font-display font-semibold shrink-0 ml-3">⏱ {emm}:{ess}</span>
       </div>
+      {subtitle && <p className="text-xs text-white/60 mb-1">{subtitle}</p>}
       <p className="text-[11px] text-white/40 mb-5">{doneSets}/{totalSets} séries registradas</p>
 
       {showReminder && (
@@ -349,26 +310,43 @@ export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: 
 
           return (
             <div key={bi} className="bg-navy-light border border-gold/20 rounded-card p-4">
-              <p className="font-display font-semibold text-sm text-white mb-1">{bi + 1}. {title}</p>
-              <p className="text-[11px] text-white/40 mb-3">{block.exercises[0].muscleGroup}</p>
+              <p className="font-display font-semibold text-sm text-white mb-1 break-words">{bi + 1}. {title}</p>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-[11px] text-white/40">
+                  {block.exercises[0].muscleGroup} · {block.sets}x {block.targetReps}
+                </p>
+                {block.restSeconds ? (
+                  <span className="flex items-center gap-1 text-[11px] text-white/50 shrink-0">
+                    <Timer size={12} /> Descanso {formatRest(block.restSeconds)}
+                  </span>
+                ) : null}
+              </div>
 
-              {block.exercises[0].gifUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={block.exercises[0].gifUrl} alt={title} className="w-full rounded-control mb-3 bg-navy" />
-              ) : block.exercises[0].videoUrl ? (
-                <a
-                  href={block.exercises[0].videoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 h-28 rounded-control bg-navy border border-white/10 mb-3 text-gold-light text-sm"
-                >
-                  <Play size={16} /> Ver vídeo do exercício
-                </a>
-              ) : (
-                <div className="h-24 rounded-control bg-navy border border-white/10 mb-3 flex items-center justify-center text-white/20 text-xs">
-                  Vídeo / GIF do exercício
-                </div>
-              )}
+              {(() => {
+                const mi = Math.min(mediaIdx[bi] ?? 0, block.exercises.length - 1)
+                const shown = block.exercises[mi]
+                return (
+                  <div className="mb-3">
+                    {isMulti && (
+                      <div className="flex gap-1.5 mb-2 overflow-x-auto">
+                        {block.exercises.map((ex, i) => (
+                          <button
+                            key={ex.id + i}
+                            type="button"
+                            onClick={() => setMediaIdx((m) => ({ ...m, [bi]: i }))}
+                            className={`text-[11px] px-2.5 py-1 rounded-full border shrink-0 ${
+                              i === mi ? 'bg-gold/15 border-gold/40 text-gold-light' : 'border-white/10 text-white/50'
+                            }`}
+                          >
+                            {ex.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <ExerciseMedia key={shown.id} name={shown.name} videoUrl={shown.videoUrl} gifUrl={shown.gifUrl} compact />
+                  </div>
+                )
+              })()}
 
               {block.notes && (
                 <div className="bg-purple-dark/50 border border-purple-light/20 rounded-control px-3 py-2 mb-3">
@@ -443,14 +421,6 @@ export function WorkoutSession({ workoutId, workoutName, studentName, blocks }: 
         {finishing ? 'Finalizando...' : 'Terminar treino'}
       </button>
 
-      {resting && (
-        <RestScreen
-          seconds={restSeconds}
-          total={restTotal}
-          nextLabel={restNextLabel}
-          onSkip={() => setResting(false)}
-        />
-      )}
     </main>
   )
 }

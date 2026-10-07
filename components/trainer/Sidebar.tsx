@@ -10,6 +10,7 @@ const items = [
   { href: '/trainer/alunos', label: 'Alunos' },
   { href: '/trainer/ranking', label: 'Ranking' },
   { href: '/trainer/treinos', label: 'Treinos' },
+  { href: '/trainer/planilhas', label: 'Planilhas' },
   { href: '/trainer/exercicios', label: 'Exercícios' },
   { href: '/trainer/biblioteca', label: 'Biblioteca' },
   { href: '/trainer/mensagens', label: 'Mensagens' },

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ExerciseMedia } from '@/components/student/ExerciseMedia'
 
 interface ExerciseData {
   id: string
@@ -20,7 +21,7 @@ interface ExerciseSessionProps {
   totalSets: number
   targetReps: string
   defaultLoad: number
-  restSeconds: number
+  restSeconds: number | null
   nextExerciseId: string | null
   isLast: boolean
   progress: { current: number; total: number }
@@ -45,8 +46,6 @@ export function ExerciseSession({
       done: false,
     }))
   )
-  const [resting, setResting] = useState(false)
-  const [seconds, setSeconds] = useState(restSeconds)
   const [finishing, setFinishing] = useState(false)
   const [elapsed, setElapsed] = useState(0)
 
@@ -65,17 +64,6 @@ export function ExerciseSession({
     return () => clearInterval(interval)
   }, [workoutId])
 
-  // Cronômetro de descanso entre séries
-  useEffect(() => {
-    if (!resting) return
-    if (seconds <= 0) {
-      setResting(false)
-      return
-    }
-    const t = setTimeout(() => setSeconds((s) => s - 1), 1000)
-    return () => clearTimeout(t)
-  }, [resting, seconds])
-
   function updateSet(i: number, field: 'load' | 'reps', value: number) {
     setSets((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)))
   }
@@ -83,8 +71,6 @@ export function ExerciseSession({
   function completeSet(i: number) {
     const set = sets[i]
     setSets((prev) => prev.map((s, idx) => (idx === i ? { ...s, done: true } : s)))
-    setSeconds(restSeconds)
-    setResting(true)
 
     // Salva a carga real usada — é isso que alimenta os gráficos de evolução
     fetch('/api/progress', {
@@ -105,8 +91,6 @@ export function ExerciseSession({
     }
   }
 
-  const mm = String(Math.floor(seconds / 60)).padStart(2, '0')
-  const ss = String(seconds % 60).padStart(2, '0')
   const emm = String(Math.floor(elapsed / 60)).padStart(2, '0')
   const ess = String(elapsed % 60).padStart(2, '0')
 
@@ -120,11 +104,14 @@ export function ExerciseSession({
       </div>
       <p className="text-[11px] text-white/40 mb-4">Exercício {progress.current} de {progress.total}</p>
 
-      <div className="h-44 rounded-card bg-navy-light mb-4 flex items-center justify-center text-white/30 text-sm">
-        Vídeo / GIF do exercício
+      <div className="mb-4">
+        <ExerciseMedia name={exercise.name} videoUrl={exercise.videoUrl} gifUrl={exercise.gifUrl} />
       </div>
 
-      <p className="text-xs text-white/40 mb-6">{exercise.muscleGroup}</p>
+      <p className="text-xs text-white/40 mb-6">
+        {exercise.muscleGroup}
+        {restSeconds ? ` · descanso de ${restSeconds}s entre as séries` : ''}
+      </p>
 
       <div className="flex flex-col gap-2 mb-6">
         {sets.map((set, i) => (
@@ -182,7 +169,6 @@ export function ExerciseSession({
       )}
 
       {allDone &&
-        !resting &&
         (isLast ? (
           <button
             onClick={finishWorkout}
@@ -200,12 +186,6 @@ export function ExerciseSession({
           </Link>
         ))}
 
-      {resting && (
-        <div className="fixed bottom-6 left-5 right-5 bg-purple-dark border border-purple-light/40 rounded-card p-5 text-center">
-          <p className="text-[11px] uppercase tracking-wider text-white/50 mb-1">Descanso</p>
-          <p className="font-display font-extrabold text-3xl text-gold-light mb-1">{mm}:{ss}</p>
-        </div>
-      )}
     </main>
   )
 }

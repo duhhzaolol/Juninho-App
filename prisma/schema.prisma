@@ -36,9 +36,11 @@ model User {
   passwordHash  String
   role          Role
   createdAt     DateTime @default(now())
+  emailVerifiedAt DateTime? // null = ainda não confirmou o e-mail (cadastro pelo app)
 
   studentProfile StudentProfile?
   trainerProfile TrainerProfile?
+  authTokens     AuthToken[]
 }
 
 model TrainerProfile {
@@ -56,6 +58,7 @@ model TrainerProfile {
   exercises       Exercise[]
   libraryContents LibraryContent[]
   plans           Plan[]
+  products        Product[]
 }
 
 model StudentProfile {
@@ -73,6 +76,7 @@ model StudentProfile {
   avatarUrl    String?
   whatsapp     String?
   status       String   @default("active") // pending | active
+  workoutDueAt DateTime? // consultoria: prazo para o professor liberar o treino
 
   assignments      WorkoutAssignment[]
   exerciseLogs     ExerciseLog[]
@@ -81,6 +85,7 @@ model StudentProfile {
   calendarEntries  CalendarEntry[]
   subscriptions    Subscription[]
   workoutRatings   WorkoutRating[]
+  purchases        Purchase[]
 }
 
 model Exercise {
@@ -158,6 +163,7 @@ model WeeklyProgram {
   createdAt DateTime @default(now())
 
   days      WeeklyProgramDay[]
+  productWeeks ProductWeek[]
 }
 
 model WeeklyProgramDay {
@@ -264,6 +270,7 @@ model Subscription {
   status      String   @default("active")
   startedAt   DateTime @default(now())
   renewsAt    DateTime?    // usado em planos recorrentes
+  periodDays  Int?         // consultoria: 30, 60, 90...
   purchaseDate DateTime?   // usado em compra única / parceria com influencer
 }
 
@@ -287,3 +294,80 @@ model Message {
   createdAt   DateTime @default(now())
   readAt      DateTime?
 }
+
+// ---------- Loja de planilhas ----------
+// Uma planilha (ex: Glúteos 3D) é uma sequência de semanas; cada semana é um programa semanal.
+model Product {
+  id            String   @id @default(cuid())
+  trainerId     String
+  trainer       TrainerProfile @relation(fields: [trainerId], references: [id])
+
+  slug          String   @unique
+  name          String
+  category      String?  // ex: "Glúteos"
+  tagline       String?
+  description   String?
+  priceCents    Int      @default(0)
+  oldPriceCents Int?
+  checkoutUrl   String?
+  tictoCodes    String?  // códigos do produto/oferta na Ticto, separados por vírgula (ex: OA8E76744)
+  unlockMode    String   @default("WEEKLY") // WEEKLY = uma semana a cada X dias | ALL_AFTER = tudo depois de X dias
+  unlockDays    Int      @default(7)
+  status        String   @default("draft") // draft | soon | published
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  weeks         ProductWeek[]
+  purchases     Purchase[]
+}
+
+model ProductWeek {
+  id        String        @id @default(cuid())
+  productId String
+  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  week      Int
+  programId String
+  program   WeeklyProgram @relation(fields: [programId], references: [id])
+
+  @@unique([productId, week])
+}
+
+model Purchase {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  studentId   String?
+  student     StudentProfile? @relation(fields: [studentId], references: [id])
+  email       String
+  status      String   @default("active") // active | refunded | canceled
+  source      String   @default("ticto")  // ticto | manual
+  externalId  String?  // código do pedido na Ticto
+  purchasedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@unique([productId, email])
+}
+
+// Códigos de confirmação de e-mail e links para criar senha (convite, compra, esqueci a senha)
+model AuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose   String    // VERIFY_EMAIL | SET_PASSWORD
+  tokenHash String    @unique
+  attempts  Int       @default(0)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// Cada aviso recebido da Ticto fica guardado para conferência no painel
+model WebhookLog {
+  id        String   @id @default(cuid())
+  source    String
+  result    String   // processed | ignored | error
+  message   String?
+  payload   Json
+  createdAt DateTime @default(now())
+}
+

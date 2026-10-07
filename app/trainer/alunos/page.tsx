@@ -38,10 +38,11 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       calendarEntries: { where: { date: { gte: thirtyDaysAgo } } },
       assignments: { where: { status: 'active' } },
       subscriptions: { where: { status: 'active' }, include: { plan: true } },
+      purchases: { where: { status: 'active' }, include: { product: { select: { name: true } } } },
     },
   })
 
-  const enriched = students.map((student) => {
+  const all = students.map((student) => {
     let mostRecent: Date | null = null
     for (const entry of student.calendarEntries) {
       if (!mostRecent || entry.date > mostRecent) mostRecent = entry.date
@@ -65,6 +66,9 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
 
     return {
       student,
+      // consultoria = tem plano ou treino montado pelo professor; o resto veio pelo cadastro do app / planilha
+      isConsultoria: hasPlan || hasWorkout,
+      purchaseNames: student.purchases.map((p) => p.product.name),
       daysSince,
       adherence,
       hasWorkout,
@@ -76,6 +80,9 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       isStale: hasWorkout && workoutDays !== null && workoutDays > STALE_WORKOUT_DAYS,
     }
   })
+
+  const enriched = all.filter((e) => e.isConsultoria)
+  const appUsers = all.filter((e) => !e.isConsultoria)
 
   const inactiveList = enriched.filter((e) => e.isInactive)
   const noWorkoutList = enriched.filter((e) => !e.hasWorkout)
@@ -209,7 +216,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
           />
         </form>
 
-        <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Todos os ativos ({enriched.length})</p>
+        <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Consultoria ({enriched.length})</p>
 
         <div className="flex flex-col gap-2">
           {enriched.map((e) => {
@@ -238,6 +245,32 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
             )
           })}
         </div>
+
+        {appUsers.length > 0 && (
+          <>
+            <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2 mt-8">
+              Planilhas e cadastros pelo app ({appUsers.length})
+            </p>
+            <div className="flex flex-col gap-2">
+              {appUsers.map((e) => (
+                <Link
+                  key={e.student.id}
+                  href={`/trainer/alunos/${e.student.id}`}
+                  className="flex items-center gap-3 bg-navy-light/60 border border-white/5 rounded-control px-4 py-3"
+                >
+                  <Avatar src={e.student.avatarUrl} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white">{e.student.user.name}</p>
+                    <p className="text-xs text-white/40">
+                      {e.purchaseNames.length > 0 ? `Planilha ${e.purchaseNames.join(', ')}` : 'Só cadastro, ainda sem compra'}
+                      {e.daysSince !== null ? ` · treinou há ${e.daysSince}d` : ''}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
 
         {students.length === 0 && <p className="text-white/40 text-sm">Nenhum aluno encontrado.</p>}
       </main>

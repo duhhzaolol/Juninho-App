@@ -1,15 +1,17 @@
-import { redirect } from 'next/navigation'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import type { Metadata } from 'next'
+import { headers } from 'next/headers'
+import { isLinksHost, redirectToAppHome } from '@/lib/app-home'
+import { LinksPage, linksMetadata } from '@/components/links/LinksPage'
 
+export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = linksMetadata
+
+// juninhomoro.com.br → página de links
+// app.juninhomoro.com.br → abre o app (login ou Início)
 export default async function RootPage() {
-  const session = await auth()
-
-  if (!session?.user) redirect('/login')
-  if (session.user.role === 'TRAINER') redirect('/trainer/dashboard')
-
-  const student = await prisma.studentProfile.findUnique({ where: { userId: session.user.id } })
-  if (student?.status === 'pending') redirect('/aguardando-aprovacao')
-
-  redirect('/dashboard')
+  const h = await headers()
+  if (isLinksHost(h.get('x-forwarded-host') ?? h.get('host'))) return <LinksPage />
+  await redirectToAppHome()
+  return null
 }

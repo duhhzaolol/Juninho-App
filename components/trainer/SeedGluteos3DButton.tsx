@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 export function SeedGluteos3DButton() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{ exercisesCreated: number; workoutsCreated: string[] } | null>(null)
+  const [result, setResult] = useState<{ exercisesCreated: number; workoutsCreated: string[]; programsCreated?: string[]; productCreated?: boolean } | null>(null)
 
   async function handleClick() {
     setLoading(true)
@@ -22,15 +22,17 @@ export function SeedGluteos3DButton() {
   if (result) {
     return (
       <div className="bg-gold/10 border border-gold/30 rounded-control p-3 text-xs text-white/70">
-        {result.exercisesCreated} exercício(s) novo(s) e {result.workoutsCreated.length} treino(s) criado(s) ✓
-        {result.workoutsCreated.length === 0 && ' (já existiam, nada duplicado)'}
+        {result.workoutsCreated.length > 0
+          ? `${result.programsCreated?.length ?? 0} semana(s), ${result.workoutsCreated.length} treino(s) e ${result.exercisesCreated} exercício(s) novo(s) cadastrados ✓`
+          : 'As 6 semanas do Glúteos 3D já estavam cadastradas. Nada foi duplicado ✓'}
+        {result.productCreated && ' A planilha também foi criada em Planilhas, como rascunho.'}
       </div>
     )
   }
 
   return (
     <button onClick={handleClick} disabled={loading} className="text-white/50 text-sm">
-      {loading ? 'Criando...' : '+ Programa Glúteos 3D completo'}
+      {loading ? 'Cadastrando as 6 semanas...' : '+ Glúteos 3D completo (6 semanas)'}
     </button>
   )
 }

@@ -14,12 +14,19 @@ export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null 
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    await signIn('credentials', { email, password, callbackUrl: '/' })
-    setLoading(false)
+    setError('')
+    const res = await signIn('credentials', { email, password, redirect: false })
+    if (res?.error) {
+      setError('E-mail ou senha incorretos.')
+      setLoading(false)
+      return
+    }
+    window.location.href = '/app'
   }
 
   return (
@@ -59,9 +66,15 @@ export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null 
           </button>
         </div>
 
+        {error && <p className="text-red-400 text-xs -mt-1">{error}</p>}
+
         <Button type="submit" loading={loading} fullWidth>
           Entrar
         </Button>
+
+        <Link href="/esqueci-senha" className="text-center text-white/40 text-xs -mt-1">
+          Esqueci minha senha
+        </Link>
       </form>
 
       <Link href="/cadastro" className="text-center text-white/40 text-sm mt-5 block">

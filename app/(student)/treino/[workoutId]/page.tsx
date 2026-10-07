@@ -4,12 +4,14 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { BottomNav } from '@/components/student/BottomNav'
 import { StartWorkoutButton } from '@/components/student/StartWorkoutButton'
+import { canAccessWorkout } from '@/lib/store'
 
 export default async function WorkoutPage({ params }: { params: Promise<{ workoutId: string }> }) {
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
   const { workoutId } = await params
+  if (!(await canAccessWorkout(session.user.id, workoutId))) redirect('/planilhas')
   const workout = await prisma.workout.findUnique({
     where: { id: workoutId },
     include: {
@@ -37,8 +39,8 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
       <Link href="/dashboard" className="text-white/50 text-sm mb-4 inline-block">← Voltar</Link>
 
-      <p className="font-display font-bold text-xl text-white mb-1">{workout.name}</p>
-      <div className="flex gap-3 text-xs text-white/50 mb-6">
+      <p className="font-display font-bold text-xl text-white mb-1 break-words [overflow-wrap:anywhere]">{workout.name}</p>
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/50 mb-6">
         {workout.goal && <span>{workout.goal}</span>}
         {workout.estimatedMin && <span>· {workout.estimatedMin} min</span>}
         {workout.difficulty && <span>· {workout.difficulty}</span>}
@@ -54,8 +56,8 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
             key={block.id}
             className="flex items-center justify-between bg-navy-light border border-white/10 rounded-control px-4 py-3"
           >
-            <div>
-              <p className="text-sm text-white">
+            <div className="min-w-0">
+              <p className="text-sm text-white break-words">
                 {i + 1}. {[block.exercise?.name, ...block.extraItems.map((it) => it.exercise.name)].filter(Boolean).join(' + ') || block.type}
               </p>
               <p className="text-xs text-white/40">

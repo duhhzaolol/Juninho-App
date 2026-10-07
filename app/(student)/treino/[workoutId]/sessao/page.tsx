@@ -1,6 +1,8 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { WorkoutSession } from '@/components/student/WorkoutSession'
+import { redirect } from 'next/navigation'
+import { canAccessWorkout } from '@/lib/store'
 
 export default async function WorkoutSessionPage({
   params,
@@ -9,6 +11,8 @@ export default async function WorkoutSessionPage({
 }) {
   const session = await auth()
   const { workoutId } = await params
+  if (!session?.user?.id) redirect('/login')
+  if (!(await canAccessWorkout(session.user.id, workoutId))) redirect('/planilhas')
 
   const workout = await prisma.workout.findUnique({
     where: { id: workoutId },
@@ -46,7 +50,7 @@ export default async function WorkoutSessionPage({
       sets: b.sets ?? 3,
       targetReps: b.reps ?? '10-12',
       defaultLoad: b.loadKg ?? 0,
-      restSeconds: b.restSeconds ?? 60,
+      restSeconds: b.restSeconds ?? null,
       notes: b.notes,
     }))
 
@@ -54,6 +58,7 @@ export default async function WorkoutSessionPage({
     <WorkoutSession
       workoutId={workout.id}
       workoutName={workout.name}
+      subtitle={workout.goal}
       studentName={session?.user?.name?.split(' ')[0] ?? 'Atleta'}
       blocks={blocks}
     />

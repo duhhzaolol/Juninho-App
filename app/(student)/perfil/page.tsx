@@ -16,6 +16,7 @@ export default async function ProfilePage() {
     include: {
       user: true,
       subscriptions: { where: { status: 'active' }, include: { plan: true } },
+      purchases: { where: { status: 'active' }, include: { product: true }, orderBy: { purchasedAt: 'desc' } },
     },
   })
   if (!student) redirect('/login')
@@ -44,14 +45,23 @@ export default async function ProfilePage() {
       </div>
 
       <div className="mb-6">
-        <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Plano contratado</p>
-        {student.subscriptions.length > 0 ? (
+        <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Seus planos</p>
+        {student.subscriptions.length > 0 || student.purchases.length > 0 ? (
           <div className="flex flex-col gap-2">
             {student.subscriptions.map((sub) => (
               <div key={sub.id} className="flex items-center justify-between bg-navy-light rounded-control px-4 py-3">
                 <span className="text-sm text-white">{sub.plan.name}</span>
                 <Badge color="gold" label="Ativo" />
               </div>
+            ))}
+            {student.purchases.map((p) => (
+              <Link key={p.id} href={`/planilhas/${p.product.slug}`} className="flex items-center justify-between bg-navy-light rounded-control px-4 py-3">
+                <span className="text-sm text-white">
+                  Planilha {p.product.name}
+                  <span className="block text-[11px] text-white/40">Comprada em {p.purchasedAt.toLocaleDateString('pt-BR')}</span>
+                </span>
+                <Badge color="green" label="Liberada" />
+              </Link>
             ))}
           </div>
         ) : (

@@ -61,7 +61,7 @@ function IconSprite() {
 const MUSCLES = [
   { n: '1', name: 'Máximo', title: 'Volume e projeção', text: 'O maior músculo do glúteo. É ele que dá o "empinado" visto de lado.', ex: ['Elevação pélvica', 'Terra sumô', 'Extensão de quadril'] },
   { n: '2', name: 'Médio', title: 'Formato arredondado', text: 'Fica na lateral do quadril e preenche o glúteo visto de trás.', ex: ['Cadeira abdutora', 'Passada lateral', 'Abdução com band'] },
-  { n: '3', name: 'Mínimo', title: 'Firmeza e estabilidade', text: 'O mais profundo. Estabiliza o quadril e sustenta carga nos exercícios pesados.', ex: ['Ostra com band', 'Agachamento búlgaro', 'Step'] },
+  { n: '3', name: 'Mínimo', title: 'Firmeza e estabilidade', text: 'O mais profundo. Estabiliza o quadril e sustenta carga nos exercícios pesados.', ex: ['Ostra com band', 'Agachamento búlgaro', 'Abdução no cabo'] },
 ]
 
 const WEEK = [
@@ -71,17 +71,24 @@ const WEEK = [
 
 const WEEK_DETAIL = [
   { k: 'SEG', g: true, title: 'Glúteo e posterior', text: 'Ativação com mini band, elevação pélvica em rest-pause, búlgaro, abdutora com drop set' },
-  { k: 'TER', g: false, title: 'Costas, ombro, tríceps e abdômen', text: 'Superséries para treinar mais em menos tempo' },
+  { k: 'TER', g: false, title: 'Costas, ombro, tríceps e abdômen', text: 'Bi-sets para treinar mais em menos tempo' },
   { k: 'QUA', g: true, title: 'Quadríceps e glúteo', text: 'Agachamento, hack, leg press em cluster, afundo no Smith' },
   { k: 'QUI', g: false, title: 'Superior completo', text: 'Puxadas, remadas, supino, ombro, braço e core' },
   { k: 'SEX', g: true, title: 'Perna completa com glúteo', text: 'Elevação pélvica unilateral, terra sumô, hack, flexoras' },
 ]
 
-const UNLOCKS = ['Na compra', 'Dia 8', 'Dia 15', 'Dia 22', 'Dia 29', 'Dia 36']
+const UNLOCKS = [
+  { when: 'Na compra', phase: 'Base' },
+  { when: 'Dia 8', phase: 'Base' },
+  { when: 'Dia 15', phase: 'Choque' },
+  { when: 'Dia 22', phase: 'Choque' },
+  { when: 'Dia 29', phase: 'Choque' },
+  { when: 'Dia 36', phase: 'Deload' },
+]
 
 const FEATURES = [
   { icon: 'i-play', title: 'Vídeo de execução', text: 'Cada exercício com demonstração, para fazer com a técnica certa desde a primeira série.' },
-  { icon: 'i-timer', title: 'Cronômetro de descanso', text: 'O app conta o descanso de cada série. Nada de ficar olhando o relógio.' },
+  { icon: 'i-bolt', title: 'Base, Choque e Deload', text: 'A intensidade sobe semana a semana e a última semana recupera o corpo para você colher o resultado.' },
   { icon: 'i-weight', title: 'Registro de carga', text: 'Anote o peso de cada série e veja quanto usou no treino anterior.' },
   { icon: 'i-chart', title: 'Gráfico de evolução', text: 'Acompanhe peso e medidas semana a semana.' },
   { icon: 'i-photo', title: 'Antes e depois lado a lado', text: 'Tire suas fotos no app e compare a semana 1 com a semana 6.' },
@@ -152,17 +159,13 @@ export default function Gluteos3DPage() {
 
                 <div className="ex done"><span className="n">✓</span><span><b>Ostra com mini band</b><em>3 × 12–15</em></span><span className="tech pre">Ativação</span></div>
                 <div className="ex done"><span className="n">✓</span><span><b>Passada lateral com mini band</b><em>3 × 12–15</em></span><span className="tech pre">Ativação</span></div>
-                <div className="ex now"><span className="n">3</span><span><b>Elevação pélvica</b><em>2 × 12–15 + cluster 4-4-4</em></span><span className="tech">Rest-pause</span></div>
+                <div className="ex now"><span className="n">3</span><span><b>Elevação pélvica</b><em>2 × 12–15 + cluster 4-4-4</em></span><span className="tech">Cluster</span></div>
                 <div className="load"><span>1ª 40 kg</span><span>2ª 40 kg</span><span className="on">3ª ___ kg</span></div>
                 <div className="ex"><span className="n">4</span><span><b>Agachamento sumô</b><em>3 × 12–15</em></span><span /></div>
                 <div className="ex"><span className="n">5</span><span><b>Agachamento búlgaro</b><em>3 × 12–15</em></span><span /></div>
 
                 <div className="rest">
-                  <svg className="ring" viewBox="0 0 42 42" aria-hidden="true">
-                    <circle className="track" cx="21" cy="21" r="18" />
-                    <circle className="prog" cx="21" cy="21" r="18" />
-                  </svg>
-                  <span><b>01:30</b><em>Descanso · próxima: 3ª série</em></span>
+                  <span><em>Fase Base · semana 1 de 6</em><b>Descanso de 60 a 120s</b></span>
                 </div>
               </div>
             </div>
@@ -269,17 +272,18 @@ export default function Gluteos3DPage() {
             </p>
           </div>
           <div className="timeline">
-            {UNLOCKS.map((when, i) => (
-              <div className={`tw${i === 0 ? ' open' : ''}`} key={when}>
+            {UNLOCKS.map((u, i) => (
+              <div className={`tw${i === 0 ? ' open' : ''}`} key={u.when}>
                 <div className="num">{i + 1}</div>
-                <div className="lbl">Semana</div>
-                <div className="when">{when}</div>
+                <div className="lbl">{u.phase}</div>
+                <div className="when">{u.when}</div>
                 {i > 0 && <Icon id="i-lock" />}
               </div>
             ))}
           </div>
           <div className="tl-note">
-            <p>Treino novo toda semana significa estímulo novo: exercícios, ordem e técnicas mudam para o glúteo não se acostumar.</p>
+            <p>As semanas seguem 3 fases: <b>Base</b> (1 e 2) para adaptar aos exercícios e técnicas, <b>Choque</b> (3 a 5) com intensidade máxima e <b>Deload</b> (6) para o corpo recuperar.</p>
+            <p>Séries, repetições e técnicas como cluster set, drop set e back off set mudam a cada semana para o glúteo não se acostumar.</p>
           </div>
         </div>
       </section>
@@ -355,7 +359,7 @@ export default function Gluteos3DPage() {
               <li><Icon id="i-check" /><span>6 semanas de treino, 30 treinos no total</span></li>
               <li><Icon id="i-check" /><span>Treino novo liberado toda semana no app</span></li>
               <li><Icon id="i-check" /><span>Vídeo de execução em cada exercício</span></li>
-              <li><Icon id="i-check" /><span>Cronômetro de descanso e registro de carga</span></li>
+              <li><Icon id="i-check" /><span>Registro de carga em cada série</span></li>
               <li><Icon id="i-check" /><span>Gráfico de evolução e fotos de antes e depois</span></li>
             </ul>
             <div className="price-block">

@@ -39,7 +39,8 @@
 .g3d .hero{position:relative;padding-block:8px 48px;overflow:hidden}
 .g3d .hero::before{content:"";position:absolute;inset:-20% -30% auto auto;width:520px;height:520px;background:radial-gradient(closest-side,rgba(124,58,237,.38),transparent 70%);pointer-events:none}
 .g3d .hero-grid{position:relative;display:grid;gap:36px}
-.g3d .hero h1 .brand{display:block;font-size:clamp(3.2rem,15vw,6rem);font-weight:900;line-height:.9;letter-spacing:-.02em;text-transform:uppercase}
+.g3d .hero-grid>*{min-width:0}
+.g3d .hero h1 .brand{display:block;font-size:clamp(2.6rem,13.5vw,5.2rem);font-weight:900;line-height:.9;letter-spacing:-.02em;text-transform:uppercase}
 .g3d .hero h1 .three{color:var(--gold)}
 .g3d .hero h1 .promise{display:block;font-size:clamp(1.35rem,5.4vw,2rem);font-weight:800;font-stretch:112%;line-height:1.1;margin-top:.45em}
 .g3d .price-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px}
@@ -129,6 +130,7 @@
 .g3d .tw.open .when{color:var(--gold-2)}
 .g3d .tw svg{width:14px;height:14px;margin:8px auto 0;color:var(--muted)}
 .g3d .tl-note{margin-top:18px;display:flex;flex-direction:column;gap:10px;color:var(--muted);max-width:40em}
+.g3d .tl-note b{color:var(--fg);font-weight:600}
 .g3d .feats{display:grid;gap:10px}
 .g3d .feat{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;padding:16px 4px;border-bottom:1px solid var(--line)}
 .g3d .feat:last-child{border-bottom:0}
