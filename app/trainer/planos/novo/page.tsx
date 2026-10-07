@@ -43,7 +43,7 @@ export default function NewPlanPage() {
       }),
     })
     setSaving(false)
-    if (res.ok) router.push('/trainer/planos')
+    if (res.ok) router.push('/app/trainer/planos')
   }
 
   return (

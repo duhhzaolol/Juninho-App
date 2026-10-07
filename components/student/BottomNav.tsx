@@ -4,14 +4,15 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Dumbbell, LayoutGrid, BarChart3, MessageCircle, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { isActiveRoute } from '@/lib/app-path'
 
 const items = [
-  { href: '/dashboard', label: 'Início', icon: Home },
-  { href: '/treino', label: 'Treino', icon: Dumbbell },
-  { href: '/planilhas', label: 'Planilhas', icon: LayoutGrid },
-  { href: '/progresso', label: 'Progresso', icon: BarChart3 },
-  { href: '/mensagens', label: 'Chat', icon: MessageCircle },
-  { href: '/perfil', label: 'Perfil', icon: User },
+  { href: '/app/dashboard', label: 'Início', icon: Home },
+  { href: '/app/treino', label: 'Treino', icon: Dumbbell },
+  { href: '/app/planilhas', label: 'Planilhas', icon: LayoutGrid },
+  { href: '/app/progresso', label: 'Progresso', icon: BarChart3 },
+  { href: '/app/mensagens', label: 'Chat', icon: MessageCircle },
+  { href: '/app/perfil', label: 'Perfil', icon: User },
 ]
 
 export function BottomNav() {
@@ -20,7 +21,7 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-navy-light border-t border-white/10 flex justify-around py-3 px-1 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
       {items.map((item) => {
-        const active = pathname?.startsWith(item.href)
+        const active = isActiveRoute(pathname, item.href)
         const Icon = item.icon
         return (
           <Link

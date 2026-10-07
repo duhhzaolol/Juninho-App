@@ -87,7 +87,7 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
     setSaving(true)
     const res = await fetch(`/api/workouts/${workoutId}`, { method: 'DELETE' })
     setSaving(false)
-    if (res.ok) router.push('/trainer/treinos')
+    if (res.ok) router.push('/app/trainer/treinos')
     else alert('Não deu pra excluir — confere se algum aluno ainda está usando esse treino.')
   }
 
@@ -101,7 +101,7 @@ export function WorkoutBuilder({ workoutId, initialName = '', initialBlocks = []
     })
 
     setSaving(false)
-    if (res.ok) router.push('/trainer/treinos')
+    if (res.ok) router.push('/app/trainer/treinos')
   }
 
   const editingBlock = blocks.find((b) => b.id === editingBlockId)

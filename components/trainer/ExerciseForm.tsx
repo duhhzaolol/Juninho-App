@@ -70,7 +70,7 @@ export function ExerciseForm({ exerciseId, initial }: { exerciseId?: string; ini
       body: JSON.stringify(form),
     })
     setSaving(false)
-    if (res.ok) router.push(isEditing ? `/trainer/exercicios/${exerciseId}` : '/trainer/exercicios')
+    if (res.ok) router.push(isEditing ? `/app/trainer/exercicios/${exerciseId}` : '/app/trainer/exercicios')
   }
 
   return (

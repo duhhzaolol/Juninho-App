@@ -17,7 +17,7 @@ export default async function StudentPhotoHistoryPage({ params }: { params: Prom
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-lg">
-        <Link href={`/trainer/alunos/${studentId}`} className="text-white/50 flex items-center gap-1 text-sm mb-4">
+        <Link href={`/app/trainer/alunos/${studentId}`} className="text-white/50 flex items-center gap-1 text-sm mb-4">
           <ChevronLeft size={18} /> {student.user.name}
         </Link>
 

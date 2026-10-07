@@ -120,12 +120,12 @@ export function WeeklyWorkoutBuilder() {
       }),
     })
     setSaving(false)
-    if (res.ok) router.push('/trainer/treinos/programas')
+    if (res.ok) router.push('/app/trainer/treinos/programas')
   }
 
   return (
     <main className="flex-1 px-6 py-8 pb-32 max-w-lg">
-      <Link href="/trainer/treinos" className="text-white/50 flex items-center gap-1 text-sm mb-4">
+      <Link href="/app/trainer/treinos" className="text-white/50 flex items-center gap-1 text-sm mb-4">
         <ChevronLeft size={18} /> Treinos
       </Link>
 

@@ -9,7 +9,7 @@ const weekdayLetters = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
 export default async function TrainerWorkoutsPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const trainer = await prisma.trainerProfile.findUnique({ where: { userId: session.user.id } })
   if (!trainer) return null
@@ -27,7 +27,7 @@ export default async function TrainerWorkoutsPage() {
       <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Programas de treino</p>
-          <Link href="/trainer/treinos/programas/novo" className="text-gold-light text-sm">+ Novo programa</Link>
+          <Link href="/app/trainer/treinos/programas/novo" className="text-gold-light text-sm">+ Novo programa</Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -36,7 +36,7 @@ export default async function TrainerWorkoutsPage() {
             return (
               <Link
                 key={program.id}
-                href={`/trainer/treinos/programas/${program.id}`}
+                href={`/app/trainer/treinos/programas/${program.id}`}
                 className="bg-navy-light border border-white/10 rounded-card p-5 flex flex-col"
               >
                 <div className="flex items-center justify-between mb-4">

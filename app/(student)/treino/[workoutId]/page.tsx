@@ -8,10 +8,10 @@ import { canAccessWorkout } from '@/lib/store'
 
 export default async function WorkoutPage({ params }: { params: Promise<{ workoutId: string }> }) {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const { workoutId } = await params
-  if (!(await canAccessWorkout(session.user.id, workoutId))) redirect('/planilhas')
+  if (!(await canAccessWorkout(session.user.id, workoutId))) redirect('/app/planilhas')
   const workout = await prisma.workout.findUnique({
     where: { id: workoutId },
     include: {
@@ -37,7 +37,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ workou
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
-      <Link href="/dashboard" className="text-white/50 text-sm mb-4 inline-block">← Voltar</Link>
+      <Link href="/app/dashboard" className="text-white/50 text-sm mb-4 inline-block">← Voltar</Link>
 
       <p className="font-display font-bold text-xl text-white mb-1 break-words [overflow-wrap:anywhere]">{workout.name}</p>
       <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/50 mb-6">

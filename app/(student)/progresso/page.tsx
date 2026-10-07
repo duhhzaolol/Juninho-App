@@ -18,7 +18,7 @@ export default async function ProgressPage({
   searchParams: Promise<{ days?: string }>
 }) {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const { days } = await searchParams
   const periodDays = Number(days) || 30
@@ -36,7 +36,7 @@ export default async function ProgressPage({
       progressEntries: { where: { date: { gte: since } }, orderBy: { date: 'asc' } },
     },
   })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   const totalLoad = student.exerciseLogs.reduce((sum, log) => sum + log.loadKg * log.reps, 0)
 
@@ -155,7 +155,7 @@ export default async function ProgressPage({
         <Card variant="glass" eyebrow="Fotos" title="Comparação de progresso" className="mb-4">
           <PhotoUpload first={firstPhoto} latest={latestPhoto} />
           {student.progressPhotos.length > 0 && (
-            <Link href="/progresso/fotos" className="block text-center text-xs text-gold-light mt-3">
+            <Link href="/app/progresso/fotos" className="block text-center text-xs text-gold-light mt-3">
               Ver histórico completo →
             </Link>
           )}

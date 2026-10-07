@@ -12,10 +12,10 @@ export default async function SetPasswordPage({ searchParams }: { searchParams: 
   if (!row) {
     return (
       <AuthShell title="Link expirado" subtitle="Este link já foi usado ou passou da validade.">
-        <Link href="/esqueci-senha" className="text-center font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control">
+        <Link href="/app/esqueci-senha" className="text-center font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control">
           Receber um link novo
         </Link>
-        <Link href="/login" className="text-center text-white/40 text-sm mt-6">
+        <Link href="/app/login" className="text-center text-white/40 text-sm mt-6">
           Voltar para o login
         </Link>
       </AuthShell>

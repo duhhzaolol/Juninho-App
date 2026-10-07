@@ -7,17 +7,17 @@ import { BottomNav } from '@/components/student/BottomNav'
 
 export default async function PhotoHistoryPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
     include: { progressPhotos: { orderBy: { date: 'desc' } } },
   })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
-      <Link href="/progresso" className="text-white/50 flex items-center gap-1 text-sm mb-6">
+      <Link href="/app/progresso" className="text-white/50 flex items-center gap-1 text-sm mb-6">
         <ChevronLeft size={18} /> Progresso
       </Link>
 

@@ -37,7 +37,7 @@ export default async function TrainerDashboardPage() {
 
       <main className="flex-1 px-6 py-8 max-w-lg">
         <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-6 flex items-center gap-3">
-          <Link href="/trainer/perfil">
+          <Link href="/app/trainer/perfil">
             <Avatar src={trainer.avatarUrl} size="lg" ring />
           </Link>
           <div className="flex-1">
@@ -47,7 +47,7 @@ export default async function TrainerDashboardPage() {
             </p>
             <Badge color="gold" label="Professor" />
           </div>
-          <Link href="/trainer/perfil" className="text-white/40 text-xs">Editar</Link>
+          <Link href="/app/trainer/perfil" className="text-white/40 text-xs">Editar</Link>
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-6">
@@ -72,49 +72,49 @@ export default async function TrainerDashboardPage() {
           iconBg="bg-purple"
           title="Alunos"
           subtitle="Gerencie seus alunos"
-          href="/trainer/alunos"
+          href="/app/trainer/alunos"
         />
         <ActivityRow
           icon={<Dumbbell size={20} className="text-navy" />}
           iconBg="bg-gold"
           title="Treinos"
           subtitle="Crie e edite treinos"
-          href="/trainer/treinos"
+          href="/app/trainer/treinos"
         />
         <ActivityRow
           icon={<ListChecks size={20} className="text-white" />}
           iconBg="bg-purple"
           title="Exercícios"
           subtitle="Biblioteca de exercícios"
-          href="/trainer/exercicios"
+          href="/app/trainer/exercicios"
         />
         <ActivityRow
           icon={<BookOpen size={20} className="text-white" />}
           iconBg="bg-purple"
           title="Biblioteca"
           subtitle="Vídeos, PDFs e conteúdos"
-          href="/trainer/biblioteca"
+          href="/app/trainer/biblioteca"
         />
         <ActivityRow
           icon={<MessageCircle size={20} className="text-white" />}
           iconBg="bg-purple"
           title="Mensagens"
           subtitle="Comunique-se com alunos"
-          href="/trainer/mensagens"
+          href="/app/trainer/mensagens"
         />
         <ActivityRow
           icon={<ClipboardList size={20} className="text-white" />}
           iconBg="bg-purple"
           title="Relatórios"
           subtitle="Acompanhe resultados"
-          href="/trainer/relatorios"
+          href="/app/trainer/relatorios"
         />
         <ActivityRow
           icon={<CreditCard size={20} className="text-white" />}
           iconBg="bg-purple"
           title="Planos"
           subtitle="Produtos e financeiro"
-          href="/trainer/planos"
+          href="/app/trainer/planos"
         />
       </main>
     </div>

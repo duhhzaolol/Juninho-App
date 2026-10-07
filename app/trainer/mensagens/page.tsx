@@ -25,7 +25,7 @@ export default async function TrainerMessagesPage({ searchParams }: { searchPara
           {trainer.students.map((s) => (
             <Link
               key={s.id}
-              href={`/trainer/mensagens?to=${s.userId}`}
+              href={`/app/trainer/mensagens?to=${s.userId}`}
               className={`block px-3 py-2.5 rounded-control text-sm ${selected?.id === s.id ? 'bg-gold/10 text-gold-light' : 'text-white/60'}`}
             >
               {s.user.name}

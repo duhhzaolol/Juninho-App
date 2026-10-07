@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 export default async function ProfilePage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
@@ -19,7 +19,7 @@ export default async function ProfilePage() {
       purchases: { where: { status: 'active' }, include: { product: true }, orderBy: { purchasedAt: 'desc' } },
     },
   })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
@@ -55,7 +55,7 @@ export default async function ProfilePage() {
               </div>
             ))}
             {student.purchases.map((p) => (
-              <Link key={p.id} href={`/planilhas/${p.product.slug}`} className="flex items-center justify-between bg-navy-light rounded-control px-4 py-3">
+              <Link key={p.id} href={`/app/planilhas/${p.product.slug}`} className="flex items-center justify-between bg-navy-light rounded-control px-4 py-3">
                 <span className="text-sm text-white">
                   Planilha {p.product.name}
                   <span className="block text-[11px] text-white/40">Comprada em {p.purchasedAt.toLocaleDateString('pt-BR')}</span>
@@ -70,8 +70,8 @@ export default async function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Link href="/perfil/editar" className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Editar informações</Link>
-        <Link href="/perfil/senha" className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Trocar senha</Link>
+        <Link href="/app/perfil/editar" className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Editar informações</Link>
+        <Link href="/app/perfil/senha" className="text-left bg-navy-light rounded-control px-4 py-3 text-sm text-white">Trocar senha</Link>
         <SignOutButton />
       </div>
 

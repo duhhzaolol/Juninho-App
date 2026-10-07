@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic'
 
 export default async function PlanilhasPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
   const student = await prisma.studentProfile.findUnique({ where: { userId: session.user.id } })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   const items = await storeProducts(student.id)
   const mine = items.filter((i) => i.purchase)

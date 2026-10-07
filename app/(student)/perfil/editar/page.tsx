@@ -5,13 +5,13 @@ import { EditProfileForm } from '@/components/student/EditProfileForm'
 
 export default async function EditProfilePage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
     include: { user: true },
   })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   return (
     <EditProfileForm

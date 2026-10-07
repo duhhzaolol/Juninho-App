@@ -27,7 +27,7 @@ const RESULT: Record<string, { label: string; color: 'green' | 'gray' | 'red' }>
 
 export default async function TrainerProductsPage() {
   const trainer = await currentTrainer()
-  if (!trainer) redirect('/login')
+  if (!trainer) redirect('/app/login')
 
   const [products, logs] = await Promise.all([
     prisma.product.findMany({
@@ -58,7 +58,7 @@ export default async function TrainerProductsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10">
           {products.map((p) => (
-            <Link key={p.id} href={`/trainer/planilhas/${p.id}`} className="block bg-navy-light border border-white/10 rounded-control p-4">
+            <Link key={p.id} href={`/app/trainer/planilhas/${p.id}`} className="block bg-navy-light border border-white/10 rounded-control p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-white font-medium">{p.name}</p>
                 <Badge color={STATUS[p.status]?.color ?? 'gray'} label={STATUS[p.status]?.label ?? p.status} />

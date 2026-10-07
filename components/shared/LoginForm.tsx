@@ -8,6 +8,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { WhatsAppButton } from '@/components/student/WhatsAppButton'
 import { APP_VERSION } from '@/lib/version'
+import { MainDomainHop } from '@/components/shared/MainDomainHop'
 
 export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null }) {
   const [email, setEmail] = useState('')
@@ -31,6 +32,7 @@ export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null 
 
   return (
     <main className="min-h-screen bg-navy flex flex-col justify-center px-8">
+      <MainDomainHop />
       <div className="flex flex-col items-center text-center mb-10">
         <Image src="/logo-jm.png" alt="JM" width={110} height={92} priority />
         <p className="font-display font-extrabold text-white text-sm tracking-[0.35em] -mt-1">TEAM</p>
@@ -72,12 +74,12 @@ export function LoginForm({ trainerWhatsapp }: { trainerWhatsapp: string | null 
           Entrar
         </Button>
 
-        <Link href="/esqueci-senha" className="text-center text-white/40 text-xs -mt-1">
+        <Link href="/app/esqueci-senha" className="text-center text-white/40 text-xs -mt-1">
           Esqueci minha senha
         </Link>
       </form>
 
-      <Link href="/cadastro" className="text-center text-white/40 text-sm mt-5 block">
+      <Link href="/app/cadastro" className="text-center text-white/40 text-sm mt-5 block">
         Ainda não é membro? <span className="text-gold-light">Cadastre-se</span>
       </Link>
 

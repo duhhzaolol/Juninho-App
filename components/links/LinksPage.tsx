@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { whatsappLink } from '@/lib/trainer'
 import { formatPrice } from '@/lib/store'
 import { LINKS_CONFIG as C } from '@/lib/links'
+import { MainDomainHop } from '@/components/shared/MainDomainHop'
 
 const display = Archivo({ subsets: ['latin'], axes: ['wdth'], variable: '--font-jm-display', display: 'swap' })
 
@@ -50,6 +51,7 @@ export async function LinksPage() {
 
   return (
     <main className={`${display.variable} relative min-h-screen bg-navy text-white overflow-hidden`}>
+      <MainDomainHop to="/" />
       {/* brilho roxo e riscos diagonais, como no PDF do método */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_50%_20%,rgba(124,58,237,0.45),transparent_65%)]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-[0.07] bg-[repeating-linear-gradient(115deg,#fff_0_2px,transparent_2px_46px)] [mask-image:linear-gradient(to_bottom,black,transparent)]" />

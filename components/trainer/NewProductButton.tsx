@@ -12,7 +12,7 @@ export function NewProductButton() {
     const res = await fetch('/api/products', { method: 'POST', body: JSON.stringify({ name: 'Nova planilha' }) })
     if (res.ok) {
       const p = await res.json()
-      router.push(`/trainer/planilhas/${p.id}`)
+      router.push(`/app/trainer/planilhas/${p.id}`)
     } else setLoading(false)
   }
 

@@ -7,7 +7,7 @@ import { SeedGluteos3DButton } from '@/components/trainer/SeedGluteos3DButton'
 
 export default async function WeeklyProgramsPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const trainer = await prisma.trainerProfile.findUnique({ where: { userId: session.user.id } })
   if (!trainer) return null
@@ -25,7 +25,7 @@ export default async function WeeklyProgramsPage() {
       <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Programas semanais</p>
-          <Link href="/trainer/treinos/programas/novo" className="text-gold-light text-sm">+ Novo programa</Link>
+          <Link href="/app/trainer/treinos/programas/novo" className="text-gold-light text-sm">+ Novo programa</Link>
         </div>
 
         <div className="mb-6">
@@ -36,7 +36,7 @@ export default async function WeeklyProgramsPage() {
           {programs.map((program) => (
             <Link
               key={program.id}
-              href={`/trainer/treinos/programas/${program.id}/editar`}
+              href={`/app/trainer/treinos/programas/${program.id}/editar`}
               className="block bg-navy-light border border-white/10 rounded-control p-4"
             >
               <p className="text-sm text-white mb-1">{program.name}</p>

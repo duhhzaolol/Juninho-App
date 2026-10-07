@@ -62,12 +62,12 @@ export function WeeklyProgramBuilder({ programId, initialName = '', initialSelec
       body: JSON.stringify({ name, days }),
     })
     setSaving(false)
-    if (res.ok) router.push('/trainer/treinos/programas')
+    if (res.ok) router.push('/app/trainer/treinos/programas')
   }
 
   return (
     <>
-      <Link href="/trainer/treinos/programas" className="text-white/50 flex items-center gap-1 text-sm mb-4">
+      <Link href="/app/trainer/treinos/programas" className="text-white/50 flex items-center gap-1 text-sm mb-4">
         <ChevronLeft size={18} /> Programas
       </Link>
 

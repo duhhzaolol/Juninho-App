@@ -85,7 +85,7 @@ export default function WeeklyProgramPage() {
       body: JSON.stringify({ schedule }),
     })
     setSaving(false)
-    if (res.ok) router.push(`/trainer/alunos/${studentId}`)
+    if (res.ok) router.push(`/app/trainer/alunos/${studentId}`)
   }
 
   return (
@@ -93,7 +93,7 @@ export default function WeeklyProgramPage() {
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-lg">
-        <Link href={`/trainer/alunos/${studentId}`} className="text-white/50 text-sm mb-4 inline-block">
+        <Link href={`/app/trainer/alunos/${studentId}`} className="text-white/50 text-sm mb-4 inline-block">
           ← Voltar
         </Link>
         <p className="font-display font-bold text-xl text-white mb-1">Programa da semana</p>

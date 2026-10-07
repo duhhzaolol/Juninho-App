@@ -19,12 +19,12 @@ const weekdayLabels = [
 
 export default async function TreinoIndexPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const today = new Date().getDay()
 
   const student = await prisma.studentProfile.findUnique({ where: { userId: session.user.id } })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   const plan = await getStudentPlan(student.id)
   const byWeekday = new Map(plan.items.map((a) => [a.weekday, a]))
@@ -38,7 +38,7 @@ export default async function TreinoIndexPage() {
             {plan.product.name} · semana {plan.week} de {plan.totalWeeks}
             {plan.nextUnlock && ` · a próxima libera em ${plan.nextUnlock.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`}
           </p>
-          <Link href={`/planilhas/${plan.product.slug}`} className="text-xs text-gold-light">Ver todas as semanas →</Link>
+          <Link href={`/app/planilhas/${plan.product.slug}`} className="text-xs text-gold-light">Ver todas as semanas →</Link>
         </div>
       ) : (
         <p className="text-xs text-white/40 mb-6">
@@ -47,7 +47,7 @@ export default async function TreinoIndexPage() {
       )}
 
       {plan.source === 'none' && (
-        <Link href="/planilhas" className="block bg-gold/10 border border-gold/30 rounded-control px-4 py-3 mb-4">
+        <Link href="/app/planilhas" className="block bg-gold/10 border border-gold/30 rounded-control px-4 py-3 mb-4">
           <p className="text-sm text-white font-medium">Você ainda não tem treino</p>
           <p className="text-xs text-gold-light">Escolha uma planilha do Juninho →</p>
         </Link>
@@ -81,7 +81,7 @@ export default async function TreinoIndexPage() {
           return (
             <Link
               key={value}
-              href={`/treino/${assignment.workoutId}`}
+              href={`/app/treino/${assignment.workoutId}`}
               className={cn(
                 'flex items-center justify-between rounded-control px-4 py-3 border',
                 isToday ? 'bg-gold/10 border-gold/30' : 'bg-navy-light border-white/10'

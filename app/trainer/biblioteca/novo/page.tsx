@@ -30,7 +30,7 @@ export default function NewContentPage() {
     setSaving(true)
     const res = await fetch('/api/library', { method: 'POST', body: JSON.stringify(form) })
     setSaving(false)
-    if (res.ok) router.push('/trainer/biblioteca')
+    if (res.ok) router.push('/app/trainer/biblioteca')
   }
 
   return (

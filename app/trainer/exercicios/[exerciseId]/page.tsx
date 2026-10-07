@@ -13,7 +13,7 @@ export default async function ExerciseDetailPage({ params }: { params: Promise<{
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-xl">
-        <Link href="/trainer/exercicios" className="text-white/50 text-sm mb-4 inline-block">← Biblioteca</Link>
+        <Link href="/app/trainer/exercicios" className="text-white/50 text-sm mb-4 inline-block">← Biblioteca</Link>
 
         <div className="h-48 rounded-card bg-navy-light mb-4 flex items-center justify-center text-white/20 text-xs">
           {exercise.gifUrl ? 'GIF' : exercise.videoUrl ? 'Vídeo' : 'Sem mídia cadastrada'}
@@ -42,7 +42,7 @@ export default async function ExerciseDetailPage({ params }: { params: Promise<{
         )}
 
         <div className="flex items-center gap-4 mt-6">
-          <Link href={`/trainer/exercicios/${exercise.id}/editar`} className="text-gold-light text-sm">
+          <Link href={`/app/trainer/exercicios/${exercise.id}/editar`} className="text-gold-light text-sm">
             Editar exercício
           </Link>
           <DeleteExerciseButton exerciseId={exercise.id} />

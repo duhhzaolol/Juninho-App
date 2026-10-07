@@ -91,7 +91,7 @@ export default function SignupPage() {
         Use o mesmo e-mail da compra, se já comprou uma planilha.
       </p>
 
-      <Link href="/login" className="text-center text-white/40 text-sm mt-6">
+      <Link href="/app/login" className="text-center text-white/40 text-sm mt-6">
         Já tem conta? <span className="text-gold-light">Entrar</span>
       </Link>
     </AuthShell>

@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function TrainerProductPage({ params }: { params: Promise<{ productId: string }> }) {
   const trainer = await currentTrainer()
-  if (!trainer) redirect('/login')
+  if (!trainer) redirect('/app/login')
   const { productId } = await params
 
   const product = await prisma.product.findFirst({
@@ -40,7 +40,7 @@ export default async function TrainerProductPage({ params }: { params: Promise<{
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-3xl">
-        <Link href="/trainer/planilhas" className="text-white/50 flex items-center gap-1 text-sm mb-4">
+        <Link href="/app/trainer/planilhas" className="text-white/50 flex items-center gap-1 text-sm mb-4">
           <ChevronLeft size={18} /> Planilhas
         </Link>
 
@@ -81,7 +81,7 @@ export default async function TrainerProductPage({ params }: { params: Promise<{
             <div key={p.id} className="flex items-center justify-between gap-3 bg-navy-light border border-white/10 rounded-control px-4 py-3">
               <div className="min-w-0">
                 {p.student ? (
-                  <Link href={`/trainer/alunos/${p.student.id}`} className="text-sm text-white">{p.student.user.name}</Link>
+                  <Link href={`/app/trainer/alunos/${p.student.id}`} className="text-sm text-white">{p.student.user.name}</Link>
                 ) : (
                   <p className="text-sm text-white">{p.email}</p>
                 )}

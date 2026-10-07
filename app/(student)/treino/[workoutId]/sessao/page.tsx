@@ -11,8 +11,8 @@ export default async function WorkoutSessionPage({
 }) {
   const session = await auth()
   const { workoutId } = await params
-  if (!session?.user?.id) redirect('/login')
-  if (!(await canAccessWorkout(session.user.id, workoutId))) redirect('/planilhas')
+  if (!session?.user?.id) redirect('/app/login')
+  if (!(await canAccessWorkout(session.user.id, workoutId))) redirect('/app/planilhas')
 
   const workout = await prisma.workout.findUnique({
     where: { id: workoutId },

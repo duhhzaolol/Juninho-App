@@ -245,7 +245,7 @@ export function WorkoutSession({ workoutId, workoutName, subtitle, studentName, 
         )}
 
         <Link
-          href="/dashboard"
+          href="/app/dashboard"
           className="w-full font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control text-center shadow-[0_0_24px_-4px_rgba(245,179,0,0.55)]"
         >
           Voltar ao início

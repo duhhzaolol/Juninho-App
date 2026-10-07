@@ -87,7 +87,7 @@ export function ExerciseSession({
     try {
       await fetch(`/api/workouts/${workoutId}/complete`, { method: 'POST' })
     } finally {
-      router.push('/dashboard')
+      router.push('/app/dashboard')
     }
   }
 
@@ -97,7 +97,7 @@ export function ExerciseSession({
   return (
     <main className="min-h-screen bg-navy pb-32 px-5 pt-8 relative">
       <div className="flex items-center justify-between mb-1">
-        <Link href={`/treino/${workoutId}`} className="text-white/50 text-sm">← {exercise.name}</Link>
+        <Link href={`/app/treino/${workoutId}`} className="text-white/50 text-sm">← {exercise.name}</Link>
         <span className="text-xs text-gold-light font-display font-semibold" title="Tempo total de treino">
           ⏱ {emm}:{ess}
         </span>
@@ -179,7 +179,7 @@ export function ExerciseSession({
           </button>
         ) : (
           <Link
-            href={`/treino/${workoutId}/exercicio/${nextExerciseId}`}
+            href={`/app/treino/${workoutId}/exercicio/${nextExerciseId}`}
             className="block text-center font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control"
           >
             Próximo exercício →

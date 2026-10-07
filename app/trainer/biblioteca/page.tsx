@@ -21,7 +21,7 @@ export default async function TrainerLibraryPage() {
       <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Biblioteca</p>
-          <Link href="/trainer/biblioteca/novo" className="text-gold-light text-sm">+ Novo conteúdo</Link>
+          <Link href="/app/trainer/biblioteca/novo" className="text-gold-light text-sm">+ Novo conteúdo</Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -18,7 +18,7 @@ const weekdays = [
 
 export default async function ProgramDetailPage({ params }: { params: Promise<{ programId: string }> }) {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const { programId } = await params
 
@@ -35,7 +35,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-lg">
-        <Link href="/trainer/treinos" className="text-white/50 flex items-center gap-1 text-sm mb-4">
+        <Link href="/app/trainer/treinos" className="text-white/50 flex items-center gap-1 text-sm mb-4">
           <ChevronLeft size={18} /> Treinos
         </Link>
 
@@ -43,7 +43,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
           <p className="font-display font-bold text-xl text-white">{program.name}</p>
           <div className="flex items-center gap-4">
             <DuplicateProgramButton programId={program.id} />
-            <Link href={`/trainer/treinos/programas/${program.id}/editar`} className="text-gold-light text-sm">
+            <Link href={`/app/trainer/treinos/programas/${program.id}/editar`} className="text-gold-light text-sm">
               Editar dias
             </Link>
           </div>
@@ -71,7 +71,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
             return (
               <Link
                 key={value}
-                href={`/trainer/treinos/${day.workout.id}/editar`}
+                href={`/app/trainer/treinos/${day.workout.id}/editar`}
                 className="flex items-center justify-between bg-navy-light border border-white/10 rounded-control px-4 py-3.5"
               >
                 <div className="flex items-center gap-3">

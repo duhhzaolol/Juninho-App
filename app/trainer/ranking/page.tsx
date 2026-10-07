@@ -69,7 +69,7 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
           {metrics.map((m) => (
             <a
               key={m.value}
-              href={`/trainer/ranking?by=${m.value}`}
+              href={`/app/trainer/ranking?by=${m.value}`}
               className={`text-xs px-3 py-1.5 rounded-full border ${
                 metric === m.value ? 'bg-gold/15 border-gold text-gold-light' : 'bg-navy-light border-white/10 text-white/50'
               }`}

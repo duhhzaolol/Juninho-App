@@ -55,7 +55,7 @@ export default async function PlansPage() {
       <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Planos</p>
-          <Link href="/trainer/planos/novo" className="text-gold-light text-sm">+ Novo plano</Link>
+          <Link href="/app/trainer/planos/novo" className="text-gold-light text-sm">+ Novo plano</Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
@@ -93,7 +93,7 @@ export default async function PlansPage() {
             return (
               <Link
                 key={sub.id}
-                href={`/trainer/alunos/${sub.studentId}`}
+                href={`/app/trainer/alunos/${sub.studentId}`}
                 className="flex items-center justify-between bg-navy-light border border-white/10 rounded-control px-4 py-3"
               >
                 <div>

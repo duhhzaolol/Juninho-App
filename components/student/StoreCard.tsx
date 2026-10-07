@@ -73,7 +73,7 @@ export function StoreCard({ item }: { item: StoreItem }) {
 
   if (soon) return <div className={className}>{content}</div>
   return (
-    <Link href={`/planilhas/${item.slug}`} className={className}>
+    <Link href={`/app/planilhas/${item.slug}`} className={className}>
       {content}
     </Link>
   )

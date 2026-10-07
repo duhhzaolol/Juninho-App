@@ -5,7 +5,7 @@ import { Sidebar } from '@/components/trainer/Sidebar'
 
 export default async function ReportsPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const trainer = await prisma.trainerProfile.findUnique({
     where: { userId: session.user.id },

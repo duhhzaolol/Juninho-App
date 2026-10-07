@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
+import { appHref } from '@/lib/app-path'
 
 const options = [
   { value: '7', label: 'Últimos 7 dias' },
@@ -17,7 +18,7 @@ export function PeriodSelect({ value }: { value: string }) {
     <div className="relative">
       <select
         value={value}
-        onChange={(e) => router.push(`${pathname}?days=${e.target.value}`)}
+        onChange={(e) => router.push(`${appHref(pathname)}?days=${e.target.value}`)}
         className="w-full appearance-none bg-navy-light border border-white/10 rounded-control px-4 py-2.5 text-white text-sm"
       >
         {options.map((opt) => (

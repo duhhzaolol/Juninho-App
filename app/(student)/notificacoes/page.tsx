@@ -7,7 +7,7 @@ import { BottomNav } from '@/components/student/BottomNav'
 
 export default async function NotificationsPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
@@ -16,7 +16,7 @@ export default async function NotificationsPage() {
       subscriptions: { where: { status: 'active' }, take: 1 },
     },
   })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   // Mensagens não lidas enviadas PELO professor PRA esse aluno
   const messagesFromTrainer = await prisma.message.findMany({
@@ -33,7 +33,7 @@ export default async function NotificationsPage() {
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
-      <Link href="/dashboard" className="text-white/50 flex items-center gap-1 text-sm mb-6">
+      <Link href="/app/dashboard" className="text-white/50 flex items-center gap-1 text-sm mb-6">
         <ChevronLeft size={18} /> Início
       </Link>
 
@@ -53,7 +53,7 @@ export default async function NotificationsPage() {
         {messagesFromTrainer.map((msg) => (
           <Link
             key={msg.id}
-            href="/mensagens"
+            href="/app/mensagens"
             className="flex items-start gap-3 bg-navy-light border border-white/10 rounded-control px-4 py-3"
           >
             <MessageCircle size={18} className="text-purple-light shrink-0 mt-0.5" />

@@ -40,7 +40,7 @@ export function WorkoutHeroCard({ workoutId, name, goal, subtitle }: WorkoutHero
 
   return (
     <Link
-      href={`/treino/${workoutId}`}
+      href={`/app/treino/${workoutId}`}
       className="block relative overflow-hidden rounded-card p-5 mb-4 bg-gradient-to-br from-purple-dark via-purple to-navy-light border border-white/10"
     >
       <div className="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-white/5" />

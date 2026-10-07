@@ -38,7 +38,7 @@ export default function ChangePasswordPage() {
     setSaving(false)
 
     if (res.ok) {
-      router.push('/perfil')
+      router.push('/app/perfil')
     } else {
       const data = await res.json().catch(() => ({}))
       setError(data.error === 'wrong_password' ? 'Senha atual incorreta.' : 'Não deu pra trocar. Tenta de novo.')
@@ -47,7 +47,7 @@ export default function ChangePasswordPage() {
 
   return (
     <main className="min-h-screen bg-navy px-5 pt-8 pb-10">
-      <Link href="/perfil" className="text-white/50 flex items-center gap-1 text-sm mb-6">
+      <Link href="/app/perfil" className="text-white/50 flex items-center gap-1 text-sm mb-6">
         <ChevronLeft size={18} /> Perfil
       </Link>
 

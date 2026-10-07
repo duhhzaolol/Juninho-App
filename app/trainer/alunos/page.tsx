@@ -12,12 +12,12 @@ const STALE_WORKOUT_DAYS = 45
 
 export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const { q } = await searchParams
 
   const trainer = await prisma.trainerProfile.findUnique({ where: { userId: session.user.id } })
-  if (!trainer) redirect('/login')
+  if (!trainer) redirect('/app/login')
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
 
@@ -109,7 +109,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       <main className="flex-1 px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <p className="font-display font-bold text-xl text-white">Alunos</p>
-          <Link href="/trainer/alunos/novo" className="text-gold-light text-sm">
+          <Link href="/app/trainer/alunos/novo" className="text-gold-light text-sm">
             + Novo aluno
           </Link>
         </div>
@@ -148,7 +148,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                   </div>
                   <div className="flex flex-col gap-1.5">
                     {inactiveList.map((e) => (
-                      <Link key={e.student.id} href={`/trainer/alunos/${e.student.id}`} className="text-xs text-white/70">
+                      <Link key={e.student.id} href={`/app/trainer/alunos/${e.student.id}`} className="text-xs text-white/70">
                         {e.student.user.name} · {e.daysSince === null ? 'nunca treinou' : `${e.daysSince}d sem treinar`}
                       </Link>
                     ))}
@@ -164,7 +164,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                   </div>
                   <div className="flex flex-col gap-1.5">
                     {noWorkoutList.map((e) => (
-                      <Link key={e.student.id} href={`/trainer/alunos/${e.student.id}/programa`} className="text-xs text-white/70">
+                      <Link key={e.student.id} href={`/app/trainer/alunos/${e.student.id}/programa`} className="text-xs text-white/70">
                         {e.student.user.name}
                       </Link>
                     ))}
@@ -180,7 +180,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                   </div>
                   <div className="flex flex-col gap-1.5">
                     {noPlanList.map((e) => (
-                      <Link key={e.student.id} href={`/trainer/alunos/${e.student.id}/plano`} className="text-xs text-white/70">
+                      <Link key={e.student.id} href={`/app/trainer/alunos/${e.student.id}/plano`} className="text-xs text-white/70">
                         {e.student.user.name}
                       </Link>
                     ))}
@@ -196,7 +196,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                   </div>
                   <div className="flex flex-col gap-1.5">
                     {staleList.map((e) => (
-                      <Link key={e.student.id} href={`/trainer/alunos/${e.student.id}/programa`} className="text-xs text-white/70">
+                      <Link key={e.student.id} href={`/app/trainer/alunos/${e.student.id}/programa`} className="text-xs text-white/70">
                         {e.student.user.name} · mesmo treino há {e.workoutDays}d
                       </Link>
                     ))}
@@ -226,7 +226,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
             return (
               <Link
                 key={e.student.id}
-                href={`/trainer/alunos/${e.student.id}`}
+                href={`/app/trainer/alunos/${e.student.id}`}
                 className="flex items-center gap-3 bg-navy-light border border-white/10 rounded-control px-4 py-3"
               >
                 <Avatar src={e.student.avatarUrl} size="sm" />
@@ -255,7 +255,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
               {appUsers.map((e) => (
                 <Link
                   key={e.student.id}
-                  href={`/trainer/alunos/${e.student.id}`}
+                  href={`/app/trainer/alunos/${e.student.id}`}
                   className="flex items-center gap-3 bg-navy-light/60 border border-white/5 rounded-control px-4 py-3"
                 >
                   <Avatar src={e.student.avatarUrl} size="sm" />

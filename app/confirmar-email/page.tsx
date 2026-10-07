@@ -9,13 +9,14 @@ export const dynamic = 'force-dynamic'
 // Para quem fechou o app antes de digitar o código
 export default async function ConfirmEmailPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
-  if (!user) redirect('/login')
+  if (!user) redirect('/app/login')
   if (user.emailVerifiedAt) redirect('/app')
 
   return (
     <AuthShell
+      hop={false}
       title="Confirme seu e-mail"
       subtitle={
         <>

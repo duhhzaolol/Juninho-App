@@ -23,7 +23,7 @@ export default async function CalendarPage({
   searchParams: Promise<{ month?: string }>
 }) {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const { month } = await searchParams
   const now = new Date()
@@ -95,7 +95,7 @@ export default async function CalendarPage({
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
       <div className="flex items-center gap-2 mb-6">
-        <Link href="/dashboard" className="text-white/50">
+        <Link href="/app/dashboard" className="text-white/50">
           <ChevronLeft size={20} />
         </Link>
         <p className="font-display font-bold text-lg text-white">Constância</p>
@@ -103,13 +103,13 @@ export default async function CalendarPage({
 
       <div className="bg-navy-light border border-white/10 rounded-card p-4 mb-4">
         <div className="flex items-center justify-between mb-4">
-          <Link href={`/calendario?month=${prevMonth}`} className="text-white/40 p-1">
+          <Link href={`/app/calendario?month=${prevMonth}`} className="text-white/40 p-1">
             <ChevronLeft size={18} />
           </Link>
           <p className="font-display font-semibold text-sm text-white">
             {monthNames[displayMonth]} {year}
           </p>
-          <Link href={`/calendario?month=${nextMonth}`} className="text-white/40 p-1">
+          <Link href={`/app/calendario?month=${nextMonth}`} className="text-white/40 p-1">
             <ChevronRight size={18} />
           </Link>
         </div>

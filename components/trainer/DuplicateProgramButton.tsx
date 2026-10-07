@@ -14,7 +14,7 @@ export function DuplicateProgramButton({ programId }: { programId: string }) {
     setLoading(false)
     if (res.ok) {
       const data = await res.json()
-      router.push(`/trainer/treinos/programas/${data.id}/editar`)
+      router.push(`/app/trainer/treinos/programas/${data.id}/editar`)
     }
   }
 

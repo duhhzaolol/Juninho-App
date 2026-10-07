@@ -66,7 +66,7 @@ export function NotificationBell({ initialHasUnread }: { initialHasUnread: boole
                 {data.messages.map((msg) => (
                   <Link
                     key={msg.id}
-                    href="/mensagens"
+                    href="/app/mensagens"
                     onClick={() => setOpen(false)}
                     className="flex items-start gap-3 bg-navy border border-white/10 rounded-control px-4 py-3"
                   >

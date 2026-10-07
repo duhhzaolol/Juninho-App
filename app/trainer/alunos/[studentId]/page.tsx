@@ -46,7 +46,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       <Sidebar />
 
       <main className="flex-1 px-6 py-8">
-        <Link href="/trainer/alunos" className="text-white/50 text-sm mb-4 inline-block">← Alunos</Link>
+        <Link href="/app/trainer/alunos" className="text-white/50 text-sm mb-4 inline-block">← Alunos</Link>
 
         <div className="flex items-center gap-3 mb-6">
           <div className="w-14 h-14 rounded-full bg-purple/40 border border-gold/40" />
@@ -75,14 +75,14 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   {activeSub.renewsAt && ` · vence em ${activeSub.renewsAt.toLocaleDateString('pt-BR')}`}
                 </p>
               </div>
-              <Link href={`/trainer/alunos/${student.id}/plano`} className="text-gold-light text-xs">
+              <Link href={`/app/trainer/alunos/${student.id}/plano`} className="text-gold-light text-xs">
                 Renovar
               </Link>
             </div>
           ) : (
             <div className="flex items-center justify-between">
               <p className="text-sm text-white/40">Nenhum plano ativo registrado</p>
-              <Link href={`/trainer/alunos/${student.id}/plano`} className="text-gold-light text-xs">
+              <Link href={`/app/trainer/alunos/${student.id}/plano`} className="text-gold-light text-xs">
                 Registrar plano
               </Link>
             </div>
@@ -90,7 +90,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <Link
-          href={`/trainer/alunos/${student.id}/programa`}
+          href={`/app/trainer/alunos/${student.id}/programa`}
           className="block bg-navy-light border border-white/10 rounded-control p-4 mb-4"
         >
           <div className="flex items-center justify-between">
@@ -116,7 +116,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Planilhas</p>
             <div className="flex flex-col gap-2">
               {student.purchases.map((p) => (
-                <Link key={p.id} href={`/trainer/planilhas/${p.productId}`} className="flex items-center justify-between">
+                <Link key={p.id} href={`/app/trainer/planilhas/${p.productId}`} className="flex items-center justify-between">
                   <span className="text-sm text-white">
                     {p.product.name}
                     <span className="block text-xs text-white/40">
@@ -137,7 +137,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <Card variant="glass" eyebrow="Fotos" title="Progresso visual" className="mb-4">
           <PhotoComparison photos={student.progressPhotos} />
           {student.progressPhotos.length > 0 && (
-            <Link href={`/trainer/alunos/${student.id}/fotos`} className="block text-center text-xs text-gold-light mt-3">
+            <Link href={`/app/trainer/alunos/${student.id}/fotos`} className="block text-center text-xs text-gold-light mt-3">
               Ver histórico completo →
             </Link>
           )}
@@ -160,7 +160,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           </div>
         )}
 
-        <Link href={`/trainer/mensagens?to=${student.userId}`} className="text-gold-light text-sm block mb-4">
+        <Link href={`/app/trainer/mensagens?to=${student.userId}`} className="text-gold-light text-sm block mb-4">
           Enviar mensagem →
         </Link>
 

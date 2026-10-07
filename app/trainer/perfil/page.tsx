@@ -35,7 +35,7 @@ export default function TrainerProfilePage() {
     setSaving(true)
     await fetch('/api/trainer/profile', { method: 'PATCH', body: JSON.stringify(form) })
     setSaving(false)
-    router.push('/trainer/dashboard')
+    router.push('/app/trainer/dashboard')
     router.refresh()
   }
 
@@ -44,7 +44,7 @@ export default function TrainerProfilePage() {
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-md">
-        <Link href="/trainer/dashboard" className="text-white/50 flex items-center gap-1 text-sm mb-6">
+        <Link href="/app/trainer/dashboard" className="text-white/50 flex items-center gap-1 text-sm mb-6">
           <ChevronLeft size={18} /> Dashboard
         </Link>
 

@@ -39,7 +39,7 @@ export default function TrainerChangePasswordPage() {
     setSaving(false)
 
     if (res.ok) {
-      router.push('/trainer/configuracoes')
+      router.push('/app/trainer/configuracoes')
     } else {
       const data = await res.json().catch(() => ({}))
       setError(data.error === 'wrong_password' ? 'Senha atual incorreta.' : 'Não deu pra trocar. Tenta de novo.')
@@ -51,7 +51,7 @@ export default function TrainerChangePasswordPage() {
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-md">
-        <Link href="/trainer/configuracoes" className="text-white/50 flex items-center gap-1 text-sm mb-6">
+        <Link href="/app/trainer/configuracoes" className="text-white/50 flex items-center gap-1 text-sm mb-6">
           <ChevronLeft size={18} /> Configurações
         </Link>
 

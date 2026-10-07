@@ -22,7 +22,7 @@ function greeting() {
 
 export default async function DashboardPage() {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
 
   const now = new Date()
   const weekday = now.getDay() // 0=domingo ... 6=sábado
@@ -45,12 +45,12 @@ export default async function DashboardPage() {
       trainer: true,
     },
   })
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
 
   const unreadCount = await prisma.message.count({
     where: { senderId: student.trainer.userId, receiverId: session.user.id, readAt: null },
   })
-  if (student.status === 'pending') redirect('/aguardando-aprovacao')
+  if (student.status === 'pending') redirect('/app/aguardando-aprovacao')
 
   // Treino da semana: consultoria (montado pelo professor) ou semana atual da planilha comprada
   const plan = await getStudentPlan(student.id, now)
@@ -73,17 +73,17 @@ export default async function DashboardPage() {
   const isOverdue = overdueDays !== null && overdueDays > 0
 
   const activities = [
-    { icon: <Dumbbell size={20} className="text-navy" />, iconBg: 'bg-gold', title: 'Treino do Dia', subtitle: 'Acesse seu treino de hoje', href: '/treino' },
-    { icon: <BarChart3 size={20} className="text-white" />, iconBg: 'bg-purple', title: 'Progressão', subtitle: 'Acompanhe sua evolução', href: '/progresso' },
-    { icon: <Calendar size={20} className="text-white" />, iconBg: 'bg-purple', title: 'Constância', subtitle: 'Frequência e sequência de treinos', href: '/calendario' },
-    { icon: <PlayCircle size={20} className="text-white" />, iconBg: 'bg-purple', title: 'Materiais', subtitle: 'Aulas, dicas e conteúdos', href: '/biblioteca' },
+    { icon: <Dumbbell size={20} className="text-navy" />, iconBg: 'bg-gold', title: 'Treino do Dia', subtitle: 'Acesse seu treino de hoje', href: '/app/treino' },
+    { icon: <BarChart3 size={20} className="text-white" />, iconBg: 'bg-purple', title: 'Progressão', subtitle: 'Acompanhe sua evolução', href: '/app/progresso' },
+    { icon: <Calendar size={20} className="text-white" />, iconBg: 'bg-purple', title: 'Constância', subtitle: 'Frequência e sequência de treinos', href: '/app/calendario' },
+    { icon: <PlayCircle size={20} className="text-white" />, iconBg: 'bg-purple', title: 'Materiais', subtitle: 'Aulas, dicas e conteúdos', href: '/app/biblioteca' },
   ]
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-8">
       <FadeIn>
         <header className="flex items-center gap-3 mb-6">
-          <Link href="/perfil">
+          <Link href="/app/perfil">
             <Avatar src={student.avatarUrl} size="md" ring />
           </Link>
           <div className="flex-1">
@@ -212,7 +212,7 @@ export default async function DashboardPage() {
 
       <FadeIn delay={0.35}>
         <Link
-          href="/mensagens"
+          href="/app/mensagens"
           className="flex items-center justify-center gap-2 bg-purple/15 border border-purple-light/30 text-purple-light rounded-control py-3 text-sm font-display font-semibold mb-4"
         >
           <MessageCircle size={16} />

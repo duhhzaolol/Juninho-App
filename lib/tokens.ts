@@ -18,7 +18,7 @@ export async function createPasswordLink(userId: string, origin: string, days = 
       expiresAt: new Date(Date.now() + days * 86400000),
     },
   })
-  return `${origin}/definir-senha?token=${token}`
+  return `${origin}/app/definir-senha?token=${token}`
 }
 
 export async function findPasswordToken(token: string) {

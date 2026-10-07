@@ -54,7 +54,7 @@ export function EditProfileForm({ initial }: { initial: Initial }) {
 
     setSaving(false)
     if (res.ok) {
-      router.push('/perfil')
+      router.push('/app/perfil')
       router.refresh()
     } else {
       setError('Não deu pra salvar. Tenta de novo.')
@@ -63,7 +63,7 @@ export function EditProfileForm({ initial }: { initial: Initial }) {
 
   return (
     <main className="min-h-screen bg-navy px-5 pt-8 pb-10">
-      <Link href="/perfil" className="text-white/50 flex items-center gap-1 text-sm mb-6">
+      <Link href="/app/perfil" className="text-white/50 flex items-center gap-1 text-sm mb-6">
         <ChevronLeft size={18} /> Perfil
       </Link>
 

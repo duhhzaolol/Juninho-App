@@ -11,7 +11,7 @@ export function StartWorkoutButton({ workoutId, alreadyTrained }: { workoutId: s
   if (!alreadyTrained) {
     return (
       <button
-        onClick={() => router.push(`/treino/${workoutId}/sessao`)}
+        onClick={() => router.push(`/app/treino/${workoutId}/sessao`)}
         className="w-full text-center font-display font-semibold text-sm bg-gold text-navy py-3.5 rounded-control mb-6"
       >
         Iniciar treino
@@ -31,7 +31,7 @@ export function StartWorkoutButton({ workoutId, alreadyTrained }: { workoutId: s
             Cancelar
           </button>
           <button
-            onClick={() => router.push(`/treino/${workoutId}/sessao`)}
+            onClick={() => router.push(`/app/treino/${workoutId}/sessao`)}
             className="flex-1 text-sm font-display font-semibold py-2.5 rounded-control bg-gold text-navy"
           >
             Sim, treinar

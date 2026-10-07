@@ -25,7 +25,7 @@ export default async function PlanilhaPage({
   searchParams: Promise<{ semana?: string }>
 }) {
   const session = await auth()
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/app/login')
   const { slug } = await params
   const { semana } = await searchParams
 
@@ -41,7 +41,7 @@ export default async function PlanilhaPage({
       },
     }),
   ])
-  if (!student) redirect('/login')
+  if (!student) redirect('/app/login')
   if (!product || product.status === 'draft') notFound()
 
   const purchase = await prisma.purchase.findFirst({ where: { productId: product.id, studentId: student.id, status: 'active' } })
@@ -55,7 +55,7 @@ export default async function PlanilhaPage({
       : null
     return (
       <main className="min-h-screen bg-navy pb-48 px-5 pt-6">
-        <Link href="/planilhas" className="flex items-center gap-1 text-xs text-white/50 mb-4"><ChevronLeft size={14} /> Planilhas</Link>
+        <Link href="/app/planilhas" className="flex items-center gap-1 text-xs text-white/50 mb-4"><ChevronLeft size={14} /> Planilhas</Link>
 
         <div className="relative overflow-hidden rounded-card p-5 mb-5 bg-gradient-to-br from-purple-dark via-purple to-navy-light border border-white/10">
           <div className="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-white/5" />
@@ -144,7 +144,7 @@ export default async function PlanilhaPage({
 
   return (
     <main className="min-h-screen bg-navy pb-28 px-5 pt-6">
-      <Link href="/planilhas" className="flex items-center gap-1 text-xs text-white/50 mb-4"><ChevronLeft size={14} /> Planilhas</Link>
+      <Link href="/app/planilhas" className="flex items-center gap-1 text-xs text-white/50 mb-4"><ChevronLeft size={14} /> Planilhas</Link>
 
       <div className="flex items-center justify-between mb-1 gap-2">
         <p className="font-display font-bold text-2xl text-white">{product.name}</p>
@@ -193,7 +193,7 @@ export default async function PlanilhaPage({
             isSelected && open ? 'bg-gold/10 border-gold/30' : 'bg-navy-light border-white/10'
           )
           return open ? (
-            <Link key={w.id} href={`/planilhas/${product.slug}?semana=${w.week}`} className={cls} scroll={false}>{body}</Link>
+            <Link key={w.id} href={`/app/planilhas/${product.slug}?semana=${w.week}`} className={cls} scroll={false}>{body}</Link>
           ) : (
             <div key={w.id} className={cls}>{body}</div>
           )
@@ -207,7 +207,7 @@ export default async function PlanilhaPage({
             {selectedWeek.program.days.filter((d) => d.workout).map((d) => (
               <Link
                 key={d.id}
-                href={`/treino/${d.workoutId}`}
+                href={`/app/treino/${d.workoutId}`}
                 className="flex items-center gap-3 bg-navy-light border border-white/10 rounded-control px-4 py-3"
               >
                 <span className="text-[11px] font-display font-bold text-gold-light w-8">{DAY_LABEL[d.weekday]}</span>

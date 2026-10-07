@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Archivo, Inter } from 'next/font/google'
+import { MainDomainHop } from '@/components/shared/MainDomainHop'
 import './gluteos3d.css'
 
 // Página de vendas pública: juninhomoro.com.br/gluteos3d
@@ -115,6 +116,7 @@ const FAQ = [
 export default function Gluteos3DPage() {
   return (
     <div className={`g3d ${display.variable} ${body.variable}`}>
+      <MainDomainHop />
       <IconSprite />
 
       <header className="wrap topbar">

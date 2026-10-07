@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
   if (state === 'sent') {
     return (
       <AuthShell title="Confira seu e-mail" subtitle={<>Se existir uma conta com <span className="text-white">{email}</span>, mandamos um link para criar uma senha nova. Ele vale por 1 dia.</>}>
-        <Link href="/login" className="text-center text-gold-light text-sm">Voltar para o login</Link>
+        <Link href="/app/login" className="text-center text-gold-light text-sm">Voltar para o login</Link>
       </AuthShell>
     )
   }
@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
     return (
       <AuthShell title="Fale com o Juninho" subtitle="Ele te manda um link para criar uma senha nova.">
         <WhatsAppButton number={whatsapp} />
-        <Link href="/login" className="text-center text-white/40 text-sm mt-2">Voltar para o login</Link>
+        <Link href="/app/login" className="text-center text-white/40 text-sm mt-2">Voltar para o login</Link>
       </AuthShell>
     )
   }
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
         <input required type="email" placeholder="E-mail" autoComplete="email" className={authInputClass} value={email} onChange={(e) => setEmail(e.target.value)} />
         <Button type="submit" loading={loading} fullWidth>Enviar link</Button>
       </form>
-      <Link href="/login" className="text-center text-white/40 text-sm mt-6">Voltar para o login</Link>
+      <Link href="/app/login" className="text-center text-white/40 text-sm mt-6">Voltar para o login</Link>
     </AuthShell>
   )
 }

@@ -118,7 +118,7 @@ export default function NewStudentPage() {
       <Sidebar />
 
       <main className="flex-1 px-6 py-8 max-w-lg">
-        <Link href="/trainer/alunos" className="text-white/50 flex items-center gap-1 text-sm mb-4">
+        <Link href="/app/trainer/alunos" className="text-white/50 flex items-center gap-1 text-sm mb-4">
           <ChevronLeft size={18} /> Alunos
         </Link>
 
@@ -134,7 +134,7 @@ export default function NewStudentPage() {
             </p>
             <AccessLinkCard link={created.link} whatsapp={created.whatsapp} emailSent={created.emailSent} />
             <div className="flex gap-4 mt-6">
-              <Link href={`/trainer/alunos/${created.studentId}`} className="text-gold-light text-sm">Ver aluno</Link>
+              <Link href={`/app/trainer/alunos/${created.studentId}`} className="text-gold-light text-sm">Ver aluno</Link>
               <button type="button" onClick={() => { setCreated(null); setName(''); setEmail(''); setWhatsapp('') }} className="text-white/40 text-sm">
                 Cadastrar outro
               </button>

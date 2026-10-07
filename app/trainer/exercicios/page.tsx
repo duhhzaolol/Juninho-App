@@ -29,13 +29,13 @@ export default async function ExerciseLibraryPage({ searchParams }: { searchPara
           <p className="font-display font-bold text-xl text-white">Biblioteca de exercícios</p>
           <div className="flex items-center gap-4">
             <SeedExercisesButton />
-            <Link href="/trainer/exercicios/novo" className="text-gold-light text-sm">+ Novo exercício</Link>
+            <Link href="/app/trainer/exercicios/novo" className="text-gold-light text-sm">+ Novo exercício</Link>
           </div>
         </div>
 
         <div className="flex gap-2 mb-6 overflow-x-auto">
           <Link
-            href="/trainer/exercicios"
+            href="/app/trainer/exercicios"
             className={`text-xs px-3 py-1.5 rounded-control whitespace-nowrap ${!grupo ? 'bg-gold/10 text-gold-light' : 'bg-navy-light text-white/50'}`}
           >
             Todos
@@ -43,7 +43,7 @@ export default async function ExerciseLibraryPage({ searchParams }: { searchPara
           {muscleGroups.map((group) => (
             <Link
               key={group}
-              href={`/trainer/exercicios?grupo=${encodeURIComponent(group)}`}
+              href={`/app/trainer/exercicios?grupo=${encodeURIComponent(group)}`}
               className={`text-xs px-3 py-1.5 rounded-control whitespace-nowrap ${grupo === group ? 'bg-gold/10 text-gold-light' : 'bg-navy-light text-white/50'}`}
             >
               {group}
@@ -55,7 +55,7 @@ export default async function ExerciseLibraryPage({ searchParams }: { searchPara
           {exercises.map((exercise) => (
             <Link
               key={exercise.id}
-              href={`/trainer/exercicios/${exercise.id}`}
+              href={`/app/trainer/exercicios/${exercise.id}`}
               className="flex gap-3 bg-navy-light border border-white/10 rounded-control p-3"
             >
               <div className="w-16 h-16 rounded-control bg-navy shrink-0 flex items-center justify-center text-white/20 text-[10px]">

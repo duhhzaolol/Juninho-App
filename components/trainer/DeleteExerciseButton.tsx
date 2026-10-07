@@ -16,7 +16,7 @@ export function DeleteExerciseButton({ exerciseId }: { exerciseId: string }) {
     setLoading(false)
 
     if (res.ok) {
-      router.push('/trainer/exercicios')
+      router.push('/app/trainer/exercicios')
       router.refresh()
     } else if (res.status === 409) {
       setError('Esse exercício está sendo usado em algum treino — remova ele dos treinos antes de excluir.')
