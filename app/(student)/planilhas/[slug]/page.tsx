@@ -42,9 +42,11 @@ export default async function PlanilhaPage({
     }),
   ])
   if (!student) redirect('/app/login')
-  if (!product || product.status === 'draft') notFound()
+  if (!product) notFound()
 
   const purchase = await prisma.purchase.findFirst({ where: { productId: product.id, studentId: student.id, status: 'active' } })
+  // rascunho: só quem já tem (ex: liberada no painel) consegue abrir
+  if (product.status === 'draft' && !purchase) notFound()
   const total = product.weeks.length
   const week1 = product.weeks[0]
 

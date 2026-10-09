@@ -6,7 +6,7 @@ import { currentTrainer } from '@/lib/trainer'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Badge } from '@/components/ui/Badge'
 import { ProductEditor } from '@/components/trainer/ProductEditor'
-import { GrantForm } from '@/components/trainer/GrantForm'
+import { GrantAccess } from '@/components/trainer/GrantAccess'
 import { PurchaseStatusButton } from '@/components/trainer/PurchaseStatusButton'
 import { currentWeek } from '@/lib/store'
 
@@ -26,14 +26,22 @@ export default async function TrainerProductPage({ params }: { params: Promise<{
   })
   if (!product) notFound()
 
-  const programs = await prisma.weeklyProgram.findMany({
-    where: { trainerId: trainer.id },
-    select: { id: true, name: true },
-    orderBy: { name: 'asc' },
-  })
+  const [programs, students] = await Promise.all([
+    prisma.weeklyProgram.findMany({
+      where: { trainerId: trainer.id },
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    }),
+    prisma.studentProfile.findMany({
+      where: { trainerId: trainer.id },
+      select: { id: true, status: true, user: { select: { name: true, email: true } } },
+      orderBy: { user: { name: 'asc' } },
+    }),
+  ])
 
   const total = product.weeks.length
   const active = product.purchases.filter((p) => p.status === 'active')
+  const owners = new Set(active.map((p) => p.studentId).filter(Boolean))
 
   return (
     <div className="min-h-screen bg-navy flex flex-col md:flex-row">
@@ -66,15 +74,25 @@ export default async function TrainerProductPage({ params }: { params: Promise<{
         />
 
         <div className="bg-navy-light border border-white/10 rounded-card p-5 mt-8 mb-6">
-          <p className="font-display font-semibold text-white mb-1">Liberar manualmente</p>
+          <p className="font-display font-semibold text-white mb-1">Liberar acesso</p>
           <p className="text-xs text-white/50 mb-4">
-            Para quem comprou fora do app (ex: o PDF) ou quando um aviso da Ticto não chegou. A semana 1 libera hoje.
+            Para sorteio, presente, quem comprou fora do app (ex: o PDF) ou quando um aviso da Ticto não chegou. A semana 1
+            libera na hora.
           </p>
-          <GrantForm productId={product.id} />
+          <GrantAccess
+            productId={product.id}
+            students={students.map((s) => ({
+              id: s.id,
+              name: s.user.name,
+              email: s.user.email,
+              pending: s.status === 'pending',
+              has: owners.has(s.id),
+            }))}
+          />
         </div>
 
         <p className="text-[11px] uppercase tracking-wider text-white/40 mb-2">
-          Compradoras · {active.length} ativa(s)
+          Quem tem acesso · {active.length} ativa(s)
         </p>
         <div className="flex flex-col gap-2">
           {product.purchases.map((p) => (
@@ -86,7 +104,7 @@ export default async function TrainerProductPage({ params }: { params: Promise<{
                   <p className="text-sm text-white">{p.email}</p>
                 )}
                 <p className="text-xs text-white/40 break-all">
-                  {p.email} · {p.source === 'manual' ? 'manual' : 'Ticto'} em {p.purchasedAt.toLocaleDateString('pt-BR')}
+                  {p.email} · {p.source === 'manual' ? 'liberada no painel' : 'Ticto'} em {p.purchasedAt.toLocaleDateString('pt-BR')}
                   {p.status === 'active' && total > 0 && ` · semana ${currentWeek(product, p.purchasedAt, total)} de ${total}`}
                   {p.student && !p.student.user.emailVerifiedAt && ' · ainda não criou a senha'}
                 </p>

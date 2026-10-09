@@ -86,6 +86,13 @@ export function ProductEditor({ product, programs }: { product: ProductForm; pro
           <option value="published">À venda</option>
         </select>
       </div>
+      <p className="text-xs text-white/50 -mt-4 mb-6">
+        {f.status === 'draft'
+          ? 'Rascunho: só você vê. Para aparecer para todas as alunas na aba Planilhas, mude para “À venda” e salve. Quem você liberar já vê mesmo assim.'
+          : f.status === 'soon'
+            ? 'Em breve: aparece para todas as alunas, sem o botão de comprar.'
+            : 'À venda: aparece para todas as alunas na aba Planilhas, com o botão de comprar.'}
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Field label="Nome"><input className={inputClass} value={f.name} onChange={(e) => set('name', e.target.value)} /></Field>
@@ -114,7 +121,7 @@ export function ProductEditor({ product, programs }: { product: ProductForm; pro
         <Field label="Código na Ticto" hint="O código do produto ou da oferta (o fim do link do checkout). Pode pôr mais de um, separados por vírgula.">
           <input className={inputClass} value={f.tictoCodes} onChange={(e) => set('tictoCodes', e.target.value)} />
         </Field>
-        <Field label="Endereço no app" hint={`app.juninhomoro.com.br/planilhas/${f.slug}`}>
+        <Field label="Endereço no app" hint={`juninhomoro.com.br/app/planilhas/${f.slug}`}>
           <input className={inputClass} value={f.slug} onChange={(e) => set('slug', e.target.value)} />
         </Field>
       </div>

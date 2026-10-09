@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { DuplicateProgramButton } from '@/components/trainer/DuplicateProgramButton'
+import { DeleteProgramButton } from '@/components/trainer/DeleteProgramButton'
 import { ChevronLeft, ChevronRight, Coffee, Dumbbell } from 'lucide-react'
 
 const weekdays = [
@@ -24,9 +25,18 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
 
   const program = await prisma.weeklyProgram.findUnique({
     where: { id: programId },
-    include: { days: { include: { workout: true } } },
+    include: {
+      days: { include: { workout: true } },
+      productWeeks: { include: { product: { select: { name: true } } }, orderBy: { week: 'asc' } },
+    },
   })
   if (!program) return null
+
+  // semana de alguma planilha: não pode ser excluído (a planilha ficaria sem essa semana)
+  const lockedReason =
+    program.productWeeks.length > 0
+      ? `Ele é a semana ${program.productWeeks.map((w) => `${w.week} da planilha ${w.product.name}`).join(', semana ')}. Para excluir, tire essa semana da planilha em Planilhas primeiro.`
+      : null
 
   const byWeekday = new Map(program.days.map((d) => [d.weekday, d]))
 
@@ -39,14 +49,13 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
           <ChevronLeft size={18} /> Treinos
         </Link>
 
-        <div className="flex items-center justify-between mb-6">
-          <p className="font-display font-bold text-xl text-white">{program.name}</p>
-          <div className="flex items-center gap-4">
-            <DuplicateProgramButton programId={program.id} />
-            <Link href={`/app/trainer/treinos/programas/${program.id}/editar`} className="text-gold-light text-sm">
-              Editar dias
-            </Link>
-          </div>
+        <p className="font-display font-bold text-xl text-white mb-3">{program.name}</p>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-6">
+          <Link href={`/app/trainer/treinos/programas/${program.id}/editar`} className="text-gold-light text-sm">
+            Editar dias
+          </Link>
+          <DuplicateProgramButton programId={program.id} />
+          <DeleteProgramButton programId={program.id} programName={program.name} lockedReason={lockedReason} />
         </div>
 
         <div className="flex flex-col gap-2">

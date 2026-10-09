@@ -67,8 +67,11 @@ export default async function TrainerProductsPage() {
                 <Badge color={STATUS[p.status]?.color ?? 'gray'} label={STATUS[p.status]?.label ?? p.status} />
               </div>
               <p className="text-xs text-white/40">
-                {p._count.weeks} semana(s) · {formatPrice(p.priceCents)} · {p.purchases.length} compradora(s) ativa(s)
+                {p._count.weeks} semana(s) · {formatPrice(p.priceCents)} · {p.purchases.length} com acesso
               </p>
+              {p.status === 'draft' && (
+                <p className="text-[11px] text-gold-light/80 mt-1">Ainda não aparece para as alunas. Abra e mude para “À venda”.</p>
+              )}
             </Link>
           ))}
           {products.length === 0 && (

@@ -143,8 +143,11 @@ export async function canAccessWorkout(userId: string, workoutId: string, now = 
 
 // Planilhas para mostrar na loja da aluna
 export async function storeProducts(studentId: string | null) {
+  // à venda e em breve aparecem para todas; a planilha que a aluna já tem aparece sempre (mesmo em rascunho)
   const products = await prisma.product.findMany({
-    where: { status: { in: ['published', 'soon'] } },
+    where: studentId
+      ? { OR: [{ status: { in: ['published', 'soon'] } }, { purchases: { some: { studentId, status: 'active' } } }] }
+      : { status: { in: ['published', 'soon'] } },
     include: { weeks: { select: { week: true } } },
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
   })
