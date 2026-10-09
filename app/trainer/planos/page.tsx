@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Sidebar } from '@/components/trainer/Sidebar'
 import { Badge } from '@/components/ui/Badge'
+import { ChevronRight } from 'lucide-react'
+import { effectivePriceCents, promoActive } from '@/lib/plans'
 
 const typeLabels: Record<string, string> = {
   PLANILHA: 'Planilha',
@@ -29,8 +31,12 @@ export default async function PlansPage() {
   if (!trainer) return null
 
   const plans = await prisma.plan.findMany({
-    where: { trainerId: trainer.id },
-    include: { _count: { select: { subscriptions: true } } },
+    where: { trainerId: trainer.id, archivedAt: null },
+    include: {
+      _count: { select: { subscriptions: { where: { status: 'active' } } } },
+      product: { select: { name: true } },
+    },
+    orderBy: { name: 'asc' },
   })
 
   const activeSubs = await prisma.subscription.findMany({
@@ -59,19 +65,39 @@ export default async function PlansPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-          {plans.map((plan) => (
-            <div key={plan.id} className="bg-navy-light border border-white/10 rounded-control p-4">
-              <div className="flex items-center justify-between mb-2">
-                <Badge color="purple" label={typeLabels[plan.type] ?? plan.type} />
-                <span className="text-xs text-white/40">{plan._count.subscriptions} aluno(s)</span>
-              </div>
-              <p className="text-sm text-white mb-1">{plan.name}</p>
-              <p className="font-display font-bold text-gold-light mb-2">
-                {(plan.priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </p>
-              <Badge color={billingColors[plan.billingType] ?? 'purple'} label={billingLabels[plan.billingType] ?? plan.billingType} />
-            </div>
-          ))}
+          {plans.map((plan) => {
+            const promo = promoActive(plan)
+            return (
+              <Link
+                key={plan.id}
+                href={`/app/trainer/planos/${plan.id}`}
+                className="block bg-navy-light border border-white/10 rounded-control p-4"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Badge color="purple" label={typeLabels[plan.type] ?? plan.type} />
+                  <span className="flex items-center gap-1 text-xs text-white/40">
+                    {plan._count.subscriptions} ativo(s) <ChevronRight size={14} />
+                  </span>
+                </div>
+                <p className="text-sm text-white mb-1">{plan.name}</p>
+                <p className="mb-2">
+                  {promo && (
+                    <span className="text-xs text-white/40 line-through mr-2">
+                      {(plan.priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  )}
+                  <span className="font-display font-bold text-gold-light">
+                    {(effectivePriceCents(plan) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
+                  {promo && <span className="text-[11px] text-green-400 ml-2">promoção</span>}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge color={billingColors[plan.billingType] ?? 'purple'} label={billingLabels[plan.billingType] ?? plan.billingType} />
+                  {plan.product && <span className="text-[11px] text-white/50">Libera: {plan.product.name}</span>}
+                </div>
+              </Link>
+            )
+          })}
         </div>
 
         {plans.length === 0 && <p className="text-white/40 text-sm mb-8">Nenhum plano cadastrado ainda.</p>}

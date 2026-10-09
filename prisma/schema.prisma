@@ -256,6 +256,18 @@ model Plan {
   name         String
   priceCents   Int
 
+  // promoção (opcional): vale entre as datas; sem datas, vale sempre
+  promoPriceCents Int?
+  promoStartsAt   DateTime?
+  promoEndsAt     DateTime?
+
+  // planilha liberada na hora em que este plano é registrado para um aluno
+  productId    String?
+  product      Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  // plano excluído que já tinha alunos: some das listas, mas o histórico fica
+  archivedAt   DateTime?
+
   subscriptions Subscription[]
 }
 
@@ -319,6 +331,7 @@ model Product {
 
   weeks         ProductWeek[]
   purchases     Purchase[]
+  plans         Plan[]
 }
 
 model ProductWeek {

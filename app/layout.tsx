@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { NavigationProgress } from '@/components/shared/NavigationProgress'
 
 export const metadata: Metadata = {
   title: 'JM Team',
@@ -9,7 +10,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className="font-body bg-navy text-white antialiased">{children}</body>
+      <body className="font-body bg-navy text-white antialiased">
+        <NavigationProgress />
+        {children}
+      </body>
     </html>
   )
 }

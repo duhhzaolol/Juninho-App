@@ -3,3 +3,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Toque: link e botão ficam mais claros enquanto o dedo está em cima, para saber que o toque pegou */
+a:active,
+button:not(:disabled):active {
+  opacity: 0.65;
+}

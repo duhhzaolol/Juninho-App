@@ -77,6 +77,22 @@ const MIGRATIONS: { version: number; name: string; sql: string[] }[] = [
       )`,
     ],
   },
+  {
+    version: 2,
+    name: 'planos: promoção, planilha ligada e excluir',
+    sql: [
+      `ALTER TABLE "Plan" ADD COLUMN IF NOT EXISTS "promoPriceCents" INTEGER`,
+      `ALTER TABLE "Plan" ADD COLUMN IF NOT EXISTS "promoStartsAt" TIMESTAMP(3)`,
+      `ALTER TABLE "Plan" ADD COLUMN IF NOT EXISTS "promoEndsAt" TIMESTAMP(3)`,
+      `ALTER TABLE "Plan" ADD COLUMN IF NOT EXISTS "productId" TEXT`,
+      `ALTER TABLE "Plan" ADD COLUMN IF NOT EXISTS "archivedAt" TIMESTAMP(3)`,
+      `DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Plan_productId_fkey') THEN
+          ALTER TABLE "Plan" ADD CONSTRAINT "Plan_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+        END IF;
+      END $$`,
+    ],
+  },
 ]
 
 export const SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version

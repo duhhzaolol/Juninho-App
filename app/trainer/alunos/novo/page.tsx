@@ -21,7 +21,7 @@ const PERIODS = [
   { label: 'Semestral (180 dias)', days: 180 },
 ]
 
-type Plan = { id: string; name: string; priceCents: number; billingType: string }
+type Plan = { id: string; name: string; priceCents: number; effectivePriceCents: number; billingType: string; product: { name: string } | null }
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -70,7 +70,7 @@ export default function NewStudentPage() {
   function choosePlan(id: string) {
     setPlanId(id)
     const plan = plans.find((p) => p.id === id)
-    if (plan) setPrice((plan.priceCents / 100).toFixed(2).replace('.', ','))
+    if (plan) setPrice((plan.effectivePriceCents / 100).toFixed(2).replace('.', ','))
   }
 
   function choosePeriod(days: number) {
@@ -158,7 +158,7 @@ export default function NewStudentPage() {
                 <select className={inputClass} value={planId} onChange={(e) => choosePlan(e.target.value)}>
                   <option value="">Sem plano por enquanto</option>
                   {plans.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
+                    <option key={p.id} value={p.id}>{p.name}{p.product ? ` (libera ${p.product.name})` : ''}</option>
                   ))}
                 </select>
                 {planId && (

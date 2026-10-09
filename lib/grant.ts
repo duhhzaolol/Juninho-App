@@ -96,3 +96,21 @@ export async function revokeProduct(productId: string, email: string, orderId?: 
   await prisma.purchase.update({ where: { id: row.id }, data: { status: 'refunded' } })
   return true
 }
+
+// Libera sem mandar aviso (quando o aviso já vai junto com outro, ex: o convite da consultoria)
+export async function attachPurchase(productId: string, studentId: string, email: string) {
+  const e = normalizeEmail(email)
+  const existing = await prisma.purchase.findUnique({ where: { productId_email: { productId, email: e } } })
+  if (existing?.status === 'active') {
+    if (existing.studentId !== studentId) await prisma.purchase.update({ where: { id: existing.id }, data: { studentId } })
+    return
+  }
+  if (existing) {
+    await prisma.purchase.update({
+      where: { id: existing.id },
+      data: { status: 'active', studentId, purchasedAt: new Date(), source: 'manual' },
+    })
+  } else {
+    await prisma.purchase.create({ data: { productId, email: e, studentId, source: 'manual' } })
+  }
+}

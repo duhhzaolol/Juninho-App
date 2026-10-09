@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { grantPlanProduct } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 export async function POST(req: Request, { params }: { params: Promise<{ studentId: string }> }) {
   const session = await auth()
@@ -17,6 +19,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ student
   // Confirma que o aluno é mesmo desse professor
   const student = await prisma.studentProfile.findFirst({ where: { id: studentId, trainerId: trainer.id } })
   if (!student) return NextResponse.json({ error: 'student not found' }, { status: 404 })
+
+  const plan = await prisma.plan.findFirst({ where: { id: planId, trainerId: trainer.id }, include: { product: true } })
+  if (!plan) return NextResponse.json({ error: 'plan not found' }, { status: 404 })
 
   // Encerra qualquer assinatura ativa anterior antes de criar a nova
   await prisma.subscription.updateMany({
@@ -35,5 +40,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ student
     },
   })
 
-  return NextResponse.json(subscription)
+  // Plano que libera uma planilha: o aluno já recebe a planilha no app
+  let granted: string | null = null
+  if (plan.product) {
+    await grantPlanProduct(plan.product.id, [studentId], new URL(req.url).origin)
+    granted = plan.product.name
+  }
+
+  return NextResponse.json({ ...subscription, granted })
 }

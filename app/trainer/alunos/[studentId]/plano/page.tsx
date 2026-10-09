@@ -22,6 +22,9 @@ interface Plan {
   type: string
   billingType: string
   priceCents: number
+  effectivePriceCents: number
+  promoActive: boolean
+  product: { id: string; name: string } | null
 }
 
 export default function RegisterSubscriptionPage() {
@@ -56,7 +59,7 @@ export default function RegisterSubscriptionPage() {
   function handlePlanSelect(planId: string) {
     setSelectedPlanId(planId)
     const plan = plans.find((p) => p.id === planId)
-    if (plan) setPrice((plan.priceCents / 100).toFixed(2).replace('.', ','))
+    if (plan) setPrice((plan.effectivePriceCents / 100).toFixed(2).replace('.', ','))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -96,10 +99,15 @@ export default function RegisterSubscriptionPage() {
             <option value="">Selecione um plano</option>
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {(p.priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                {p.name} — {(p.effectivePriceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                {p.promoActive ? ' (promoção)' : ''}
               </option>
             ))}
           </select>
+
+          {selectedPlan?.product && (
+            <p className="text-xs text-green-400">Ao salvar, a planilha {selectedPlan.product.name} é liberada na hora no app do aluno.</p>
+          )}
 
           <label className="text-xs text-white/40 mt-2">Valor combinado (pode ajustar se deu desconto)</label>
           <input

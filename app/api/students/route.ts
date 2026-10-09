@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { currentTrainer, whatsappLink } from '@/lib/trainer'
 import { createPasswordLink, normalizeEmail, randomPassword } from '@/lib/tokens'
 import { emailTemplates, sendEmail } from '@/lib/email'
+import { attachPurchase } from '@/lib/grant'
+import { effectivePriceCents } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
 
@@ -74,13 +76,15 @@ export async function POST(req: Request) {
         data: {
           studentId: student.id,
           planId: plan.id,
-          priceCents: Number.isFinite(Number(b.priceCents)) && Number(b.priceCents) > 0 ? Number(b.priceCents) : plan.priceCents,
+          priceCents: Number.isFinite(Number(b.priceCents)) && Number(b.priceCents) > 0 ? Number(b.priceCents) : effectivePriceCents(plan),
           periodDays,
           renewsAt,
           purchaseDate: new Date(),
           status: 'active',
         },
       })
+      // plano que libera uma planilha: já fica liberada (o link do convite serve para entrar)
+      if (plan.productId) await attachPurchase(plan.productId, student.id, email)
     }
   }
 

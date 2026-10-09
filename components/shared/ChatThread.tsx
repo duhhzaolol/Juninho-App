@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ChatBubble } from './ChatBubble'
+import { cn } from '@/lib/utils'
 
 interface Message {
   id: string
@@ -14,9 +15,11 @@ interface ChatThreadProps {
   currentUserId: string
   counterpartId: string
   counterpartName: string
+  header?: ReactNode // cabeçalho próprio (ex: foto, nome e voltar no painel)
+  className?: string // altura da conversa
 }
 
-export function ChatThread({ currentUserId, counterpartId, counterpartName }: ChatThreadProps) {
+export function ChatThread({ currentUserId, counterpartId, counterpartName, header, className }: ChatThreadProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [text, setText] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -57,10 +60,10 @@ export function ChatThread({ currentUserId, counterpartId, counterpartName }: Ch
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
-      <p className="font-display font-semibold text-white px-1 mb-3">{counterpartName}</p>
+    <div className={cn('flex flex-col', className ?? 'h-[calc(100vh-64px)]')}>
+      {header ?? <p className="font-display font-semibold text-white px-1 mb-3">{counterpartName}</p>}
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-2 px-1">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 px-1">
         {messages.map((m) => (
           <ChatBubble
             key={m.id}
